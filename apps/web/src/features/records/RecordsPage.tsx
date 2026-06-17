@@ -1,0 +1,66 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { ExportButton } from "./ExportButton";
+import { FilterPanel } from "./FilterPanel";
+import { RecordsTable } from "./RecordsTable";
+import { useDebouncedFilter, useRecords } from "./useRecords";
+import { filterStateToQuery, queryToFilterState, useRecordsFilterStore } from "@/stores/filters";
+
+export function RecordsPage() {
+  const [page, setPage] = useState(1);
+  const [size] = useState(50);
+  const filter = useRecordsFilterStore();
+  const debounced = useDebouncedFilter(filter, 300);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  // URL → store hidrasyonu yalnız mount'ta bir kez. `filter`'a bağımlı olmak
+  // sonsuz döngü yaratır: hydrate → store değişir → yeni referans → effect → …
+  const hydratedRef = useRef(false);
+  useEffect(() => {
+    if (hydratedRef.current) return;
+    hydratedRef.current = true;
+    const sp = searchParams ?? new URLSearchParams();
+    useRecordsFilterStore.getState().hydrate(queryToFilterState(sp));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const records = useRecords(page, size);
+
+  useEffect(() => {
+    if (page === 1) return;
+    if (records.data && page > records.data.total_pages) {
+      setPage(1);
+    }
+  }, [records.data, page]);
+
+  useEffect(() => {
+    const q = filterStateToQuery(debounced);
+    const url = q ? `${pathname}?${q}` : pathname;
+    router.replace(url, { scroll: false });
+  }, [debounced, pathname, router]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [debounced]);
+
+  return (
+    <main className="container mx-auto space-y-4 py-8">
+      <header className="flex items-end justify-between">
+        <div>
+          <p className="font-mono text-sm text-muted-foreground">MAGNA · Kayıtlar</p>
+          <h1 className="mt-1 text-3xl font-bold tracking-tight">Üretim Kayıtları</h1>
+        </div>
+        <ExportButton />
+      </header>
+
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[280px_1fr]">
+        <FilterPanel />
+        <RecordsTable page={page} size={size} onPageChange={setPage} />
+      </div>
+    </main>
+  );
+}

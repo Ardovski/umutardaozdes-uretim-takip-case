@@ -1,7 +1,8 @@
 {
   "root": true,
   "extends": ["next/core-web-vitals"],
-  "plugins": ["boundaries"],
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["boundaries", "@typescript-eslint"],
   "settings": {
     "import/resolver": { "typescript": { "project": "tsconfig.json" } },
     "boundaries/elements": [

@@ -1,0 +1,30 @@
+{
+  "//": "Claude Code hook'larını ETKİNLEŞTİRMEK için bu dosyayı 'settings.json' olarak kopyala, sonra Claude'u yeniden başlat.",
+  "//opt-in": "cp .claude/settings.json.example .claude/settings.json  (komut çalıştıran config olduğu için bilinçli onay gerektirir)",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [{ "type": "command", "command": ".claude/hooks/protect-env.sh" }]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [{ "type": "command", "command": ".claude/hooks/sync-ai-context.sh" }]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "//": "Her prompt'u ai_usage/transcripts/session-<gün>.md'ye loglar (§8 şeffaflık).",
+        "hooks": [{ "type": "command", "command": ".claude/hooks/log-prompt.sh" }]
+      }
+    ],
+    "Stop": [
+      {
+        "//": "Her yanıt sonunda tam transcript'i tazeler (idempotent — üzerine yazar).",
+        "hooks": [{ "type": "command", "command": "scripts/export-ai-transcript.sh >/dev/null 2>&1 || true" }]
+      }
+    ]
+  }
+}

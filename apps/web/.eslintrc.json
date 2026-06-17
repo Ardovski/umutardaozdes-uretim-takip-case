@@ -1,0 +1,66 @@
+{
+  "root": true,
+  "extends": ["next/core-web-vitals"],
+  "plugins": ["boundaries"],
+  "settings": {
+    "import/resolver": { "typescript": { "project": "tsconfig.json" } },
+    "boundaries/elements": [
+      { "type": "app", "pattern": "src/app", "mode": "folder" },
+      { "type": "feature", "pattern": "src/features/*", "mode": "folder", "capture": ["featureName"] },
+      {
+        "type": "shared",
+        "pattern": ["src/components", "src/lib", "src/hooks", "src/stores", "src/types"],
+        "mode": "folder"
+      }
+    ],
+    "boundaries/ignore": ["**/*.test.*", "**/*.spec.*", "**/*.config.*"]
+  },
+  "rules": {
+    "boundaries/element-types": [
+      "error",
+      {
+        "default": "disallow",
+        "message": "Mimari sınır ihlali: bir feature başka bir feature'ı import edemez. Ortak kod 'shared' (components/lib/hooks/stores/types) içine taşınmalı.",
+        "rules": [
+          { "from": ["app"], "allow": ["app", "feature", "shared"] },
+          {
+            "from": ["feature"],
+            "allow": ["shared", ["feature", { "featureName": "${from.featureName}" }]]
+          },
+          { "from": ["shared"], "allow": ["shared"] }
+        ]
+      }
+    ],
+    "import/no-cycle": ["error", { "maxDepth": 1 }],
+    "@typescript-eslint/no-explicit-any": "error",
+    "no-console": ["warn", { "allow": ["warn", "error"] }],
+    "no-restricted-imports": [
+      "error",
+      {
+        "paths": [
+          { "name": "next/router", "message": "App Router'da 'next/navigation' kullan (next/router değil)." }
+        ],
+        "patterns": [
+          {
+            "group": ["@/features/*/*", "../*/features/*", "../../features/*"],
+            "message": "Feature içine derin import yok. Public API (@/features/<ad>) üzerinden veya 'shared' kullan."
+          }
+        ]
+      }
+    ],
+    "no-restricted-syntax": [
+      "error",
+      {
+        "selector": "MemberExpression[object.object.name='process'][object.property.name='env']",
+        "message": "process.env'e doğrudan erişme; tek nokta '@/lib/env' kullan (secret koruması + tip)."
+      }
+    ]
+  },
+  "overrides": [
+    { "files": ["src/lib/env.ts"], "rules": { "no-restricted-syntax": "off" } },
+    {
+      "files": ["src/app/**", "*.config.*", "next.config.mjs"],
+      "rules": { "no-restricted-imports": "off" }
+    }
+  ]
+}

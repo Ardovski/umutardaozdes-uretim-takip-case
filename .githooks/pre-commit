@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# AI-bağımsız pre-commit hook (Claude, MiniMax, insan — herkeste çalışır).
+# Kur: `make hooks`  (git config core.hooksPath .githooks)
+set -euo pipefail
+
+staged=$(git diff --cached --name-only)
+
+# 1) Secret sızıntısını engelle — gerçek .env commit edilemez (.example serbest)
+leak=$(printf '%s\n' "$staged" | grep -E '(^|/)\.env($|\.)' | grep -vE '\.example$' || true)
+if [ -n "$leak" ]; then
+  echo "pre-commit HATA: secret dosyası commit edilemez:" >&2
+  printf '  %s\n' "$leak" >&2
+  echo "  .gitignore'da olduğundan emin ol; .env.example kullan." >&2
+  exit 1
+fi
+
+# 2) AGENTS.md değiştiyse CLAUDE.md'yi senkron tut
+if printf '%s\n' "$staged" | grep -qx 'AGENTS.md'; then
+  cp AGENTS.md CLAUDE.md && git add CLAUDE.md
+  echo "pre-commit: CLAUDE.md, AGENTS.md ile senkronlandı."
+fi
+
+echo "pre-commit OK"

@@ -1,0 +1,7 @@
+# Geliştirme/test bağımlılıkları
+-r requirements.txt
+
+pytest>=8.0       # test (özellikle validasyon kuralları)
+pytest-cov>=5.0   # kapsam
+ruff>=0.4         # format + lint
+mypy>=1.9         # statik tip kontrol

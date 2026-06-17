@@ -1,0 +1,27 @@
+{
+  "name": "uretim-takip-case",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Üretim Performans Takip Uygulaması — MAGNA case study (monorepo)",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "make dev",
+    "dev:web": "make dev-web",
+    "dev:api": "make dev-api",
+    "setup": "make setup",
+    "test": "make test",
+    "lint": "make lint",
+    "format": "make format",
+    "check": "make check"
+  },
+  "engines": {
+    "node": ">=20",
+    "npm": ">=10"
+  },
+  "packageManager": "npm@10.0.0",
+  "author": "Umut Arda Özdeş",
+  "license": "UNLICENSED"
+}

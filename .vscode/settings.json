@@ -1,0 +1,80 @@
+{
+  // ===========================================================================
+  // VS Code çalışma alanı ayarları — paylaşılan (repo'ya commit edilir).
+  // Amaç: root'u sadeleştir (file nesting), tutarlı format, Python+TS entegrasyon.
+  // ===========================================================================
+
+  // --- Explorer: FILE NESTING (ilişkili dosyaları parent altında yuvala) ---
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.expand": false,
+  "explorer.fileNesting.patterns": {
+    // kök: AGENTS.md altında CLAUDE.md (tek kaynak + kopya)
+    "AGENTS.md": "CLAUDE.md",
+    "README.md": "LICENSE, LICENSE.*, CHANGELOG*, CONTRIBUTING*, SECURITY*, AUTHORS*, CODE_OF_CONDUCT*",
+    "package.json": "package-lock.json, npm-shrinkwrap.json, pnpm-lock.yaml, yarn.lock, .npmrc, .nvmrc, .node-version, .editorconfig",
+    "Makefile": ".gitattributes",
+    ".gitignore": ".gitattributes, .gitkeep",
+    // .env.example parent → gerçek .env'ler altına yuvalanır (root temiz)
+    ".env.example": ".env, .env.*, !.env.example",
+    ".env.local.example": ".env.local, .env.local.*",
+    // frontend config'leri tek parent altında topla
+    "tsconfig.json": "tsconfig.*.json, next-env.d.ts, *.tsbuildinfo",
+    "next.config.*": "next-env.d.ts, .eslintrc.json, .eslintrc.*, eslint.config.*, .prettierrc*, prettier.config.*",
+    "tailwind.config.*": "postcss.config.*, components.json",
+    // backend config'leri pyproject altında
+    "pyproject.toml": "requirements*.txt, setup.py, setup.cfg, .python-version, ruff.toml, pytest.ini, mypy.ini, tox.ini, poetry.lock, uv.lock"
+  },
+
+  // --- Sade görünüm + performans (cache/build dizinlerini gizle/izleme) ---
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/.pytest_cache": true,
+    "**/.ruff_cache": true,
+    "**/.mypy_cache": true
+  },
+  "files.watcherExclude": {
+    "**/.venv/**": true,
+    "**/node_modules/**": true,
+    "**/.next/**": true,
+    "**/__pycache__/**": true,
+    "**/apps/api/var/**": true
+  },
+  "search.exclude": {
+    "**/.venv": true,
+    "**/node_modules": true,
+    "**/.next": true,
+    "**/*.lock": true,
+    "**/apps/api/var": true
+  },
+
+  // --- Python (apps/api) ---
+  "python.defaultInterpreterPath": "${workspaceFolder}/apps/api/.venv/bin/python",
+  "python.testing.pytestEnabled": true,
+  "python.testing.pytestArgs": ["apps/api/tests"],
+  "python.analysis.typeCheckingMode": "basic",
+  "python.analysis.autoImportCompletions": true,
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": { "source.organizeImports": "explicit" }
+  },
+
+  // --- TypeScript / React (apps/web) ---
+  "eslint.workingDirectories": [{ "directory": "apps/web", "changeProcessCWD": true }],
+  "typescript.tsdk": "apps/web/node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "[typescript]": { "editor.defaultFormatter": "esbenp.prettier-vscode", "editor.formatOnSave": true },
+  "[typescriptreact]": { "editor.defaultFormatter": "esbenp.prettier-vscode", "editor.formatOnSave": true },
+  "[json]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[jsonc]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+
+  // --- Tailwind IntelliSense (cva/cn helper'ları içinde de çalışsın) ---
+  "tailwindCSS.experimental.classRegex": [
+    ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+    ["cn\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"]
+  ],
+  "tailwindCSS.includeLanguages": { "typescript": "javascript", "typescriptreact": "javascript" },
+
+  "files.eol": "\n",
+  "editor.rulers": [100]
+}

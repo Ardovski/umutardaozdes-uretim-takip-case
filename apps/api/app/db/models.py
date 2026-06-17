@@ -37,7 +37,8 @@ class ImportBatch(Base):
     imported_rows: Mapped[int] = mapped_column(Integer, default=0)
     rejected_rows: Mapped[int] = mapped_column(Integer, default=0)
     suspect_rows: Mapped[int] = mapped_column(Integer, default=0)
-    status: Mapped[str] = mapped_column(String(20), default="processing")  # processing|completed|failed
+    error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    status: Mapped[str] = mapped_column(String(20), default="processing")  # processing|completed|failed|duplicate
 
     records: Mapped[list[ProductionRecord]] = relationship(
         back_populates="batch", cascade="all, delete-orphan"
@@ -143,10 +144,11 @@ class SyncSubmission(Base):
     shift: Mapped[int] = mapped_column(Integer)
     idempotency_key: Mapped[str] = mapped_column(String(40))  # "{prod_date}:{shift}"
     payload_hash: Mapped[str] = mapped_column(String(64))
-    status: Mapped[str] = mapped_column(String(12), default="pending")  # pending|success|failed
+    status: Mapped[str] = mapped_column(String(12), default="pending")  # pending|success|failed|retrying
     http_status: Mapped[int | None] = mapped_column(Integer)
     target_submission_id: Mapped[int | None] = mapped_column(Integer)
     response_body: Mapped[str | None] = mapped_column(Text)
+    error_message: Mapped[str | None] = mapped_column(Text)
     attempts: Mapped[int] = mapped_column(Integer, default=0)
     last_attempt_at: Mapped[dt.datetime | None] = mapped_column(DateTime)
     created_at: Mapped[dt.datetime] = mapped_column(DateTime, server_default=func.now())

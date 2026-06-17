@@ -35,6 +35,18 @@ class Settings(BaseSettings):
     target_api_backoff_base_seconds: int = 2
     target_api_rate_limit_cooldown_seconds: int = 60
 
+    # --- Validation eşik & toleranslar ---
+    validation_tolerance_pct: float = 1.0
+    validation_p_suspect_upper: float = 100.0
+    validation_p_impossible_upper: float = 150.0
+    validation_minutes_per_day: int = 1440
+    validation_outlier_z_threshold: float = 3.0
+    validation_systemic_ratio: float = 0.2
+    validation_report_window_start: str = "2025-11-05"
+    validation_report_window_end: str = "2025-11-25"
+    validation_work_order_pattern: str = r"^302\d{7}$"
+    validation_station_pattern: str = r"^IMM-\d+-\d+$"
+
     @property
     def cors_origins_list(self) -> list[str]:
         return [o.strip() for o in self.cors_allow_origins.split(",") if o.strip()]

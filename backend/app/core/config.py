@@ -1,16 +1,23 @@
 """Uygulama ayarları — .env'den tip-güvenli okuma (pydantic-settings).
 
 Secret'lar (TARGET_API_KEY) yalnız buradan erişilir; asla log'lanmaz, response'a konmaz.
-uvicorn `apps/api` dizininden çalıştığı için kök .env yolu `../../.env`.
+Yollar CWD'den bağımsız mutlak hesaplanır (repo kökü = config.py parents[3]).
 """
 from __future__ import annotations
 
+from pathlib import Path
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# config.py: <repo>/backend/app/core/config.py → parents[3] = <repo>.
+_REPO_ROOT = Path(__file__).resolve().parents[3]
+# Repo kökündeki db/ klasörü — veritabanının evi.
+DB_DIR = _REPO_ROOT / "db"
 
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=("../../.env", ".env"),
+        env_file=(str(_REPO_ROOT / ".env"), ".env"),
         env_file_encoding="utf-8",
         extra="ignore",
         case_sensitive=False,
@@ -21,7 +28,8 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
 
     # --- Veritabanı (SQLite) ---
-    database_url: str = "sqlite:///./var/app.db"
+    # Varsayılan: repo kökündeki db/app.db (mutlak yol → her CWD'den aynı dosya).
+    database_url: str = f"sqlite:///{DB_DIR / 'app.db'}"
 
     # --- CORS ---
     cors_allow_origins: str = "http://localhost:3000"

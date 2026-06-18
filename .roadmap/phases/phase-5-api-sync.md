@@ -25,8 +25,8 @@
 
 ## Dokunulacak Dosyalar
 ```
-apps/api/app/features/sync/{aggregator,client,service}.py + api/v1/sync.py
-apps/web/src/features/sync/* + app/sync/page.tsx
+backend/app/features/sync/{aggregator,client,service}.py + api/v1/sync.py
+frontend/src/features/sync/* + app/sync/page.tsx
 ```
 
 ## Kabul Kriteri

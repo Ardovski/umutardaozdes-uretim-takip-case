@@ -9,7 +9,7 @@
 
 ## Faz 0 — Temel & Kurulum
 - [x] Git deposu başlatıldı (`git init`)
-- [x] Monorepo iskeleti (`apps/api`, `apps/web`, `packages`, `data`, `ai_usage`)
+- [x] Monorepo iskeleti (`backend`, `frontend`, `packages`, `data`, `ai_usage`)
 - [x] Kök `Makefile` (`make help/setup/dev/test/lint/db-*`)
 - [x] `.gitignore` (secret/venv/node_modules/runtime DB; `data/*.csv` hariç tutulmuyor)
 - [x] `.env.example` (backend secret'ları, placeholder)

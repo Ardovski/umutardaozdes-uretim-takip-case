@@ -52,13 +52,13 @@ uygulaması. MES'ten gelen `.csv` üretim raporlarını:
 > Frontend secret tutmaz. Hedef API çağrısı (X-Production-Key) **sadece FastAPI**'de.
 > Akış: Browser → Next.js → FastAPI → Hedef API.
 
-## 4. Monorepo Yapısı (detay: `.docs/shared/architecture/monorepo.md`)
+## 4. Proje Yapısı (detay: `.docs/shared/architecture/monorepo.md`)
 
 ```
-apps/api   FastAPI backend  (app/features: ingestion, validation, analytics, records, sync)
-apps/web   Next.js frontend (src/features: import, dashboard, records, validation, sync)
-packages/  paylaşılan kontrat [bonus]      data/  production_data.csv (commit edilir)
-ai_usage/  AI logları (§8)                 .docs/ dokümantasyon    .roadmap/ plan + CHECKLIST
+backend/   FastAPI backend  (app/features: ingestion, validation, analytics, records, sync)
+frontend/  Next.js frontend (src/features: import, dashboard, records, validation, sync)
+db/        SQLite veritabanı (app.db + README)   data/  production_data.csv (commit edilir)
+ai_usage/  AI logları (§8)   scripts/ yardımcılar   .docs/ doküman   .roadmap/ plan + CHECKLIST
 Makefile · README.md · .env.example · AGENTS.md (MiniMax) + CLAUDE.md
 ```
 

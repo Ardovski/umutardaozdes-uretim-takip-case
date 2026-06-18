@@ -7,7 +7,7 @@ SQLite case study'de **zorunlu**. Veri: ~2.117 satır (100K+ bonus hedefi). Vali
 düzeltme audit'i ve idempotent sync log'u kalıcı tutulmalı.
 
 ## Karar
-- SQLite, **SQLAlchemy ORM** ile. Runtime DB: `apps/api/var/app.db` (gitignore'lu).
+- SQLite, **SQLAlchemy ORM** ile. Runtime DB: `db/app.db` (repo kökü, gitignore'lu).
 - 5 tablo: `import_batches`, `production_records`, `validation_issues`, `record_edits`,
   `sync_submissions` (bkz. [`database.md`](../../api/database.md)).
 - Tekillik: `production_records.row_hash` unique; `sync_submissions.idempotency_key` unique.

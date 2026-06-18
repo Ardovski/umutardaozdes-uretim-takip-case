@@ -2,10 +2,9 @@
   "name": "uretim-takip-case",
   "version": "0.1.0",
   "private": true,
-  "description": "Üretim Performans Takip Uygulaması — MAGNA case study (monorepo)",
+  "description": "Üretim Performans Takip Uygulaması — MAGNA case study",
   "workspaces": [
-    "apps/*",
-    "packages/*"
+    "frontend"
   ],
   "scripts": {
     "dev": "make dev",

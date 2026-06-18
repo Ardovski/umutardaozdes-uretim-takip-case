@@ -31,10 +31,10 @@ raporla ve düzeltilebilir kıl. Bu fazın kalitesi puanın en büyük tek belir
 
 ## Dokunulacak Dosyalar
 ```
-apps/api/app/features/validation/{engine,report}.py + rules/*.py
-apps/api/app/api/v1/validation.py
-apps/api/tests/unit/test_rules_*.py
-apps/web/src/features/validation/* + app/validation/page.tsx
+backend/app/features/validation/{engine,report}.py + rules/*.py
+backend/app/api/v1/validation.py
+backend/tests/unit/test_rules_*.py
+frontend/src/features/validation/* + app/validation/page.tsx
 ```
 
 ## Kabul Kriteri

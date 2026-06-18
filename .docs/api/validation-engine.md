@@ -5,7 +5,7 @@ spesifikasyondur: [`../shared/domain/validation-rules.md`](../shared/domain/vali
 
 ## Yerleşim
 ```
-apps/api/app/features/validation/
+backend/app/features/validation/
 ├── engine.py        # kuralları kayıtlara uygular, Issue listesi üretir
 ├── report.py        # issue'ları sınıflandırır, özet + indirilebilir rapor (bonus)
 └── rules/
@@ -44,7 +44,7 @@ Bir kural yüklemenin önemli bir oranında tetikleniyorsa "sistemik" etiketleni
 sorunu) ve raporda ayrı gruplanır.
 
 ## Test
-`apps/api/tests/unit/test_<kategori>_rules.py` — her kural için pozitif (tetiklenir) ve negatif
+`backend/tests/unit/test_<kategori>_rules.py` — her kural için pozitif (tetiklenir) ve negatif
 (temiz/sınır kayıt tetiklenmez) test. Yanlış pozitif önleme bu negatif testlerle güvenceye alınır.
 
 ## İlgili

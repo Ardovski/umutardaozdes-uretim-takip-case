@@ -23,8 +23,7 @@ htmlcov/
 .coverage
 coverage.xml
 
-# --- Runtime SQLite DB (data/production_data.csv ise commit EDİLİR) ---
-apps/api/var/
+# --- Runtime SQLite DB (db/app.db gitignore'lu; db/README.md commit EDİLİR) ---
 *.db
 *.sqlite
 *.sqlite3

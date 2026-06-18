@@ -37,20 +37,20 @@
     "**/node_modules/**": true,
     "**/.next/**": true,
     "**/__pycache__/**": true,
-    "**/apps/api/var/**": true
+    "**/db/*.db": true
   },
   "search.exclude": {
     "**/.venv": true,
     "**/node_modules": true,
     "**/.next": true,
     "**/*.lock": true,
-    "**/apps/api/var": true
+    "**/db/*.db": true
   },
 
-  // --- Python (apps/api) ---
-  "python.defaultInterpreterPath": "${workspaceFolder}/apps/api/.venv/bin/python",
+  // --- Python (backend) ---
+  "python.defaultInterpreterPath": "${workspaceFolder}/backend/.venv/bin/python",
   "python.testing.pytestEnabled": true,
-  "python.testing.pytestArgs": ["apps/api/tests"],
+  "python.testing.pytestArgs": ["backend/tests"],
   "python.analysis.typeCheckingMode": "basic",
   "python.analysis.autoImportCompletions": true,
   "[python]": {
@@ -59,9 +59,9 @@
     "editor.codeActionsOnSave": { "source.organizeImports": "explicit" }
   },
 
-  // --- TypeScript / React (apps/web) ---
-  "eslint.workingDirectories": [{ "directory": "apps/web", "changeProcessCWD": true }],
-  "typescript.tsdk": "apps/web/node_modules/typescript/lib",
+  // --- TypeScript / React (frontend) ---
+  "eslint.workingDirectories": [{ "directory": "frontend", "changeProcessCWD": true }],
+  "typescript.tsdk": "frontend/node_modules/typescript/lib",
   "typescript.enablePromptUseWorkspaceTsdk": true,
   "[typescript]": { "editor.defaultFormatter": "esbenp.prettier-vscode", "editor.formatOnSave": true },
   "[typescriptreact]": { "editor.defaultFormatter": "esbenp.prettier-vscode", "editor.formatOnSave": true },

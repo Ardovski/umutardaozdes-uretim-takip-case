@@ -1,12 +1,12 @@
 # ============================================================================
 # Üretim Performans Takip Uygulaması — Makefile
-# Monorepo: apps/api (FastAPI)  +  apps/web (Next.js)
+# backend (FastAPI)  +  frontend (Next.js)
 # Kullanım: `make help`
 # ============================================================================
 
 # --- Yapılandırma ---------------------------------------------------------
-API_DIR   := apps/api
-WEB_DIR   := apps/web
+API_DIR   := backend
+WEB_DIR   := frontend
 VENV      := $(API_DIR)/.venv
 PY        := $(VENV)/bin/python
 PIP       := $(VENV)/bin/pip
@@ -83,31 +83,31 @@ setup-web: ## Frontend bağımlılıkları (npm install)
 dev: ## api (:8000) + web (:3000) birlikte çalıştır
 	@echo "$(B)Başlatılıyor:$(R) api→:$(API_PORT)  web→:$(WEB_PORT)  (Ctrl-C ile dur)"
 	@trap 'kill 0' INT TERM; \
-	( cd $(API_DIR) && ../../$(UVICORN) app.main:app --reload --port $(API_PORT) ) & \
+	( cd $(API_DIR) && ../$(UVICORN) app.main:app --reload --port $(API_PORT) ) & \
 	( cd $(WEB_DIR) && npm run dev ) & \
 	wait
 
 dev-api: ## Sadece FastAPI (reload, :8000)
-	@cd $(API_DIR) && ../../$(UVICORN) app.main:app --reload --port $(API_PORT)
+	@cd $(API_DIR) && ../$(UVICORN) app.main:app --reload --port $(API_PORT)
 
 dev-web: ## Sadece Next.js (:3000)
 	@cd $(WEB_DIR) && npm run dev
 
 # --- Veritabanı -----------------------------------------------------------
 db-init: ## SQLite şemasını oluştur
-	@cd $(API_DIR) && ../../$(PY) -m app.db.init_db
+	@cd $(API_DIR) && ../$(PY) -m app.db.init_db
 	@echo "  ✓ DB şeması hazır"
 
 db-reset: clean-db db-init ## DB'yi sil + yeniden oluştur
 
 seed: ## data/production_data.csv'i import et (geliştirme kolaylığı)
-	@cd $(API_DIR) && ../../$(PY) -m app.features.ingestion.seed ../../data/production_data.csv
+	@cd $(API_DIR) && ../$(PY) -m app.features.ingestion.seed ../data/production_data.csv
 
 # --- Kalite ---------------------------------------------------------------
 test: test-api test-web ## Tüm testler
 
 test-api: ## Backend testleri (pytest) — özellikle validation
-	@cd $(API_DIR) && ../../$(PYTEST) -q
+	@cd $(API_DIR) && ../$(PYTEST) -q
 
 test-web: ## Frontend testleri
 	@cd $(WEB_DIR) && npm test --silent --if-present
@@ -131,7 +131,7 @@ check: lint typecheck test ## CI eşdeğeri: lint + typecheck + test
 
 # --- Temizlik -------------------------------------------------------------
 clean-db: ## Runtime SQLite DB'yi sil
-	@rm -f $(API_DIR)/var/*.db
+	@rm -f db/*.db
 	@echo "  ✓ DB silindi"
 
 clean: ## node_modules, venv, cache, build artefaktları sil

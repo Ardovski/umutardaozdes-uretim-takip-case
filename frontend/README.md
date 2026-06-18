@@ -1,11 +1,11 @@
-# apps/web — Next.js Frontend
+# frontend — Next.js Frontend
 
 Üretim Performans Takip arayüzü: dashboard, import, validation report, API sync.
 
 ## Çalıştırma
 ```bash
 make dev-web          # http://localhost:3000   (kökten)
-# veya: cd apps/web && npm run dev
+# veya: cd frontend && npm run dev
 ```
 
 ## Stack
@@ -33,7 +33,7 @@ Hardcoded renk **yok**; her şey semantic token. Detay:
 
 ## shadcn bileşeni ekleme
 ```bash
-cd apps/web && npx shadcn@latest add button card table dialog badge slider
+cd frontend && npx shadcn@latest add button card table dialog badge slider
 ```
 
 Mimari: [`../../.docs/web/architecture.md`](../../.docs/web/architecture.md)

@@ -1,13 +1,12 @@
 """DB şemasını oluştur (create_all). Çalıştır: `make db-init`.
 
-SQLite dosyası `apps/api/var/app.db` (gitignore'lu). var/ dizini yoksa oluşturulur.
+SQLite dosyası repo kökündeki `db/app.db` (gitignore'lu). db/ dizini yoksa oluşturulur.
 """
 from __future__ import annotations
 
-from pathlib import Path
-
 from sqlalchemy import Index, inspect
 
+from app.core.config import DB_DIR
 from app.db import models
 from app.db.base import Base
 from app.db.session import engine
@@ -19,7 +18,7 @@ _EXTRA_INDEXES: tuple[Index, ...] = (
 
 
 def init_db() -> None:
-    Path("var").mkdir(exist_ok=True)
+    DB_DIR.mkdir(parents=True, exist_ok=True)
     Base.metadata.create_all(bind=engine)
     for idx in _EXTRA_INDEXES:
         idx.create(bind=engine, checkfirst=True)
@@ -32,4 +31,4 @@ def init_db() -> None:
 
 if __name__ == "__main__":
     init_db()
-    print("✓ DB şeması oluşturuldu (apps/api/var/app.db)")
+    print(f"✓ DB şeması oluşturuldu ({DB_DIR / 'app.db'})")

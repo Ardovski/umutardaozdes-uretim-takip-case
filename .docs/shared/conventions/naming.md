@@ -8,15 +8,15 @@
 | Bağlam | Kural | Örnek |
 |--------|-------|-------|
 | Genel dizinler | `kebab-case` | `validation-rules`, `data-quality` |
-| **Python paketleri** (apps/api) | `snake_case` (tire YASAK — geçersiz identifier) | `features/validation`, `features/api_sync` |
-| Frontend dizinleri (apps/web) | `kebab-case` | `features/import`, `lib/api` |
+| **Python paketleri** (backend) | `snake_case` (tire YASAK — geçersiz identifier) | `features/validation`, `features/api_sync` |
+| Frontend dizinleri (frontend) | `kebab-case` | `features/import`, `lib/api` |
 | Feature adları | tekil domain ismi | `validation`, `sync`, `records` (çoğul değil `record`) |
 | Docs / roadmap | `kebab-case` | `.docs/data`, `.roadmap/phases` |
 
 > İki tarafta da feature adları **aynı** olmalı: backend `features/validation` → frontend
 > `features/validation`. (Eşleme kolaylığı.)
 
-## 2. Dosyalar — Python (apps/api)
+## 2. Dosyalar — Python (backend)
 
 | Tür | Kural | Örnek |
 |-----|-------|-------|
@@ -29,7 +29,7 @@
 | Pydantic şema | `PascalCase` + amaç soneki | `RecordCreate`, `ImportSummaryOut`, `SyncResult` |
 | SQLAlchemy model | `PascalCase` tekil | `ProductionRecord`, `ValidationIssue` |
 
-## 3. Dosyalar — TypeScript (apps/web)
+## 3. Dosyalar — TypeScript (frontend)
 
 | Tür | Kural | Örnek |
 |-----|-------|-------|

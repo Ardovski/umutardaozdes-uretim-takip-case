@@ -102,7 +102,8 @@ def test_service_row_hash_skip_on_duplicate(db) -> None:
 
 
 def test_seed_production_data_csv(db) -> None:
-    csv_path = Path(__file__).resolve().parents[3] / "data" / "production_data.csv"
+    # backend/tests/test_ingestion.py → parents[2] = repo kökü
+    csv_path = Path(__file__).resolve().parents[2] / "data" / "production_data.csv"
     if not csv_path.exists():
         pytest.skip(f"production_data.csv bulunamadı: {csv_path}")
     data = csv_path.read_bytes()

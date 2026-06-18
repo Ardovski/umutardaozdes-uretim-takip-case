@@ -1,4 +1,4 @@
-# apps/api — FastAPI Backend
+# backend — FastAPI Backend
 
 Üretim Performans Takip backend'i: CSV import, veri validasyonu, OEE analitik, hedef API sync.
 
@@ -8,8 +8,8 @@
 make dev-api          # http://localhost:8000/docs
 
 # veya elle:
-cd apps/api
-../../apps/api/.venv/bin/uvicorn app.main:app --reload --port 8000
+cd backend
+../../backend/.venv/bin/uvicorn app.main:app --reload --port 8000
 ```
 
 ## Yapı

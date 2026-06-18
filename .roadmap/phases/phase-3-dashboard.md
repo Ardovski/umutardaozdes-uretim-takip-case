@@ -21,8 +21,8 @@
 
 ## Dokunulacak Dosyalar
 ```
-apps/api/app/features/analytics/service.py + api/v1/analytics.py
-apps/web/src/features/dashboard/* + app/page.tsx
+backend/app/features/analytics/service.py + api/v1/analytics.py
+frontend/src/features/dashboard/* + app/page.tsx
 ```
 
 ## Kabul Kriteri

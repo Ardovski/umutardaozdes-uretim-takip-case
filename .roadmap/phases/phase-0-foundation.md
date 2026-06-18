@@ -17,10 +17,10 @@ ve tema token'ları hazır. "Walking skeleton".
 
 ## Dokunulacak Dosyalar
 ```
-apps/api/app/main.py, core/config.py, db/{session,models,init_db}.py
-apps/api/requirements.txt, pyproject.toml
-apps/web/{package.json, next.config.mjs, tailwind.config.ts, components.json, tsconfig.json}
-apps/web/src/app/{layout.tsx, page.tsx, globals.css}, src/lib/utils.ts
+backend/app/main.py, core/config.py, db/{session,models,init_db}.py
+backend/requirements.txt, pyproject.toml
+frontend/{package.json, next.config.mjs, tailwind.config.ts, components.json, tsconfig.json}
+frontend/src/app/{layout.tsx, page.tsx, globals.css}, src/lib/utils.ts
 ```
 
 ## Kabul Kriteri

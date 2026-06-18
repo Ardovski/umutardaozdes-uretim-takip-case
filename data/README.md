@@ -12,4 +12,4 @@ Test verisi burada durur ve **repo'ya commit edilir** (case study şartı:
 Kolon açıklamaları: [`../.docs/shared/domain/data-dictionary.md`](../.docs/shared/domain/data-dictionary.md).
 
 `.gitignore` notu: `data/*.csv` **hariç tutulmaz** (commit edilir); yalnız runtime SQLite DB
-(`apps/api/var/`) yok sayılır.
+(`db/app.db`) yok sayılır.

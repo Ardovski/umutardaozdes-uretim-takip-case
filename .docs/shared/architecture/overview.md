@@ -5,8 +5,8 @@
 ```
 ┌─────────────────┐        ┌──────────────────────────────────────┐        ┌──────────────────┐
 │   Tarayıcı       │  HTTP  │            FastAPI Backend            │  HTTPS │   Hedef MES API   │
-│  (Next.js SPA)   │ ─────► │              (apps/api)              │ ─────► │  /api/v1/submit   │
-│   apps/web       │ ◄───── │                                       │ ◄───── │  X-Production-Key │
+│  (Next.js SPA)   │ ─────► │              (backend)              │ ─────► │  /api/v1/submit   │
+│   frontend       │ ◄───── │                                       │ ◄───── │  X-Production-Key │
 │  :3000           │        │  ┌─────────────────────────────────┐ │        │  (89.252.189.91)  │
 │                  │        │  │ ingestion  validation  records │ │        └──────────────────┘
 │ dashboard/import │        │  │                                │ │
@@ -15,7 +15,7 @@
                             │               SQLAlchemy             │
                             │         ┌──────────────┐              │
                             │         │   SQLite DB   │              │
-                            │         │ apps/api/var  │              │
+                            │         │   db/app.db   │              │
                             │         └──────────────┘              │
                             └──────────────────────────────────────┘
 ```

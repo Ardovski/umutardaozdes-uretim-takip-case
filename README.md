@@ -48,10 +48,13 @@ make dev              # web → http://localhost:3000   ·   api → http://loca
 
 ### Case §7.2 — birebir komutlar (Makefile'sız)
 
-Case'teki örnek komut bloğu da doğrudan çalışır. Repo kökündeki `backend/` ve
-`frontend/` birer **symlink**'tir (`backend → apps/api`, `frontend → apps/web`);
-`apps/api/main.py` ise gerçek uygulamayı (`app.main:app`) yeniden export eden ince
-bir shim'dir. Böylece şu komutlar Makefile olmadan da çalışır:
+Case'teki örnek komut bloğu da doğrudan çalışır. Repo kökü sade:
+`README.md` · `backend/` · `frontend/` · `data/` · `db/` · `scripts/` · `ai_usage/`.
+`backend/` (FastAPI) ve `frontend/` (Next.js) gerçek klasörlerdir; `backend/main.py`,
+`app.main:app`'i yeniden export eden ince bir shim'dir (case'in `uvicorn main:app` komutu
+çalışsın diye); **`db/`** ise SQLite veritabanının evidir
+(`db/app.db` + [`db/README.md`](db/README.md) şema). Böylece şu komutlar Makefile
+olmadan da çalışır:
 
 ```bash
 cp .env.example .env
@@ -90,7 +93,7 @@ cd frontend && npm install && npm run dev
 | HTTP client | **httpx + tenacity** | Senkron + retry/backoff; hedef API için `X-Production-Key` sadece backend'de. |
 | CSV işleme | **pandas** | Normalize (tarih/ondalık/yüzde ölçeği) + groupby agregasyon. |
 | Feature organizasyon | **feature izolasyonu (ESLint boundaries)** | Cross-feature import yok; ortak kod `shared/` (components/lib/hooks/stores/types). |
-| Monorepo | **apps/* + packages/* workspaces** | Tek repo, tek setup, atomik commit. |
+| Repo yapısı | **backend/ + frontend/ (tek repo)** | Sade kök; ortak setup, atomik commit. |
 
 > Detaylı karar belgeleri: [`.docs/shared/decisions/`](.docs/shared/decisions/).
 
@@ -227,7 +230,7 @@ POST edilir.
 ## ⚠️ Yapamadıklarım / Vakit Yetmeyenler (dürüst)
 
 - **Validation birim testleri (pytest)** yazılmadı — kural motoru çalışıyor, kural sayısı
-  (47) test altyapısı olmadan teslim edildi. **En kritik borç.** (`apps/api/tests/`
+  (47) test altyapısı olmadan teslim edildi. **En kritik borç.** (`backend/tests/`
   klasörü boş, `make test` yeşil değil.)
 - **UI drag-and-drop + progress bar** import için yapılmadı (POST endpoint hazır, sadece
   basit landing mesajı var).

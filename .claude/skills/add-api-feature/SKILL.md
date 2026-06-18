@@ -1,6 +1,6 @@
 ---
 name: add-api-feature
-description: Bu üretim-takip projesinin FastAPI backend'ine yeni bir feature modülü (router + service + schema + test) eklerken kullanılır. apps/api/app/features/ altında tutarlı katmanlı yapı oluşturur ve v1 router'a bağlar. ingestion/validation/analytics/records/sync benzeri yeni bir backend yeteneği eklemek için.
+description: Bu üretim-takip projesinin FastAPI backend'ine yeni bir feature modülü (router + service + schema + test) eklerken kullanılır. backend/app/features/ altında tutarlı katmanlı yapı oluşturur ve v1 router'a bağlar. ingestion/validation/analytics/records/sync benzeri yeni bir backend yeteneği eklemek için.
 ---
 
 # Backend Feature Modülü Ekleme
@@ -12,12 +12,12 @@ Her backend yeteneği kendi feature modülünde izole; router yalnız HTTP, iş 
 
 ## Yapı
 ```
-apps/api/app/features/<feature>/
+backend/app/features/<feature>/
 ├── __init__.py
 ├── service.py     # iş mantığı (saf, test edilebilir)
 ├── router.py      # HTTP endpoint'leri (ince)
 └── schemas.py     # Pydantic I/O modelleri (veya app/schemas/ altında)
-apps/api/tests/unit/test_<feature>.py
+backend/tests/unit/test_<feature>.py
 ```
 
 ## Adımlar

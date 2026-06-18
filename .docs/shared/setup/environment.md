@@ -1,6 +1,6 @@
 # Ortam Değişkenleri (.env)
 
-İki `.env` var: **backend** (kök `.env`, secret'lı) ve **frontend** (`apps/web/.env.local`, public).
+İki `.env` var: **backend** (kök `.env`, secret'lı) ve **frontend** (`frontend/.env.local`, public).
 `make setup` ikisini de `.example`'dan kopyalar. Gerçek `.env` **asla** commit edilmez.
 
 ## Backend — kök `.env` (`.env.example`'dan)
@@ -15,10 +15,10 @@
 | `TARGET_API_RATE_LIMIT_COOLDOWN_SECONDS` | 429 bekleme | `60` |
 | `APP_ENV` | ortam | `development` |
 | `LOG_LEVEL` | log seviyesi | `INFO` |
-| `DATABASE_URL` | SQLite yolu | `sqlite:///./var/app.db` |
+| `DATABASE_URL` | SQLite yolu (boşsa repo kökü `db/app.db`) | `sqlite:///./db/app.db` |
 | `CORS_ALLOW_ORIGINS` | İzinli origin | `http://localhost:3000` |
 
-## Frontend — `apps/web/.env.local` (`.env.local.example`'dan)
+## Frontend — `frontend/.env.local` (`.env.local.example`'dan)
 | Değişken | Açıklama | Örnek |
 |----------|----------|-------|
 | `NEXT_PUBLIC_API_URL` | Backend base (tarayıcıdan erişilen) | `http://localhost:8000` |

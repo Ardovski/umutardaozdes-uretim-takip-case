@@ -18,9 +18,9 @@
 
 ## Dokunulacak Dosyalar
 ```
-apps/api/app/features/records/{service,export}.py + api/v1/records.py
-apps/web/src/features/records/* + app/records/page.tsx
-apps/web/src/stores/filters.ts
+backend/app/features/records/{service,export}.py + api/v1/records.py
+frontend/src/features/records/* + app/records/page.tsx
+frontend/src/stores/filters.ts
 ```
 
 ## Kabul Kriteri

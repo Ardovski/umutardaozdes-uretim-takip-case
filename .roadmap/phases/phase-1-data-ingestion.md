@@ -17,10 +17,10 @@
 
 ## Dokunulacak Dosyalar
 ```
-apps/api/app/features/ingestion/{service,seed}.py
-apps/api/app/api/v1/imports.py
-apps/api/app/schemas/import_schemas.py
-apps/web/src/features/import/* + app/import/page.tsx
+backend/app/features/ingestion/{service,seed}.py
+backend/app/api/v1/imports.py
+backend/app/schemas/import_schemas.py
+frontend/src/features/import/* + app/import/page.tsx
 ```
 
 ## Kabul Kriteri

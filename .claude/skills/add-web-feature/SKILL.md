@@ -1,6 +1,6 @@
 ---
 name: add-web-feature
-description: Bu üretim-takip projesinin Next.js frontend'ine yeni bir feature (sayfa + bileşenler + API hook'ları) eklerken kullanılır. apps/web/src/features/ altında tutarlı yapı oluşturur, shadcn/ui ve Tailwind semantic token'larını kullanır, TanStack Query ile FastAPI'ye bağlanır.
+description: Bu üretim-takip projesinin Next.js frontend'ine yeni bir feature (sayfa + bileşenler + API hook'ları) eklerken kullanılır. frontend/src/features/ altında tutarlı yapı oluşturur, shadcn/ui ve Tailwind semantic token'larını kullanır, TanStack Query ile FastAPI'ye bağlanır.
 ---
 
 # Frontend Feature Ekleme
@@ -12,12 +12,12 @@ Feature-bazlı; sunucu durumu TanStack Query, UI durumu Zustand. Stil yalnız se
 
 ## Yapı
 ```
-apps/web/src/features/<feature>/          # kebab-case
+frontend/src/features/<feature>/          # kebab-case
 ├── components/      # PascalCase.tsx (domain bileşenleri)
 ├── hooks/           # useX.ts (TanStack Query)
 ├── api/             # bu feature'ın FastAPI çağrıları
 └── types.ts
-apps/web/src/app/<feature>/page.tsx       # App Router sayfası
+frontend/src/app/<feature>/page.tsx       # App Router sayfası
 ```
 
 ## Adımlar

@@ -21,7 +21,7 @@ yapıda, gerekçeli ve test edilebilir olmalıdır.
    - Severity: `error` (veri kullanılamaz) / `warning` (şüpheli, kullanıcı kararı) / `info`.
    - Aksiyon: `reject` / `warn` / `fix`.
 
-2. **Kuralı yaz** — `apps/api/app/features/validation/rules/<kategori>_rules.py` içine saf fonksiyon:
+2. **Kuralı yaz** — `backend/app/features/validation/rules/<kategori>_rules.py` içine saf fonksiyon:
    ```python
    def v_c11_<kisa_ad>(record, ctx) -> Issue | None:
        """V-C11: <koşul>. <gerekçe>."""
@@ -35,7 +35,7 @@ yapıda, gerekçeli ve test edilebilir olmalıdır.
 
 3. **Motora bağla** — kural otomatik toplanıyorsa `rules/__init__.py` registry'sine ekle.
 
-4. **Test yaz** — `apps/api/tests/unit/test_<kategori>_rules.py`:
+4. **Test yaz** — `backend/tests/unit/test_<kategori>_rules.py`:
    - **Pozitif:** kuralı tetikleyen kayıt → Issue döner.
    - **Negatif:** sınırdaki/temiz kayıt → None döner (yanlış pozitif önleme).
 

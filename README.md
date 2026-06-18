@@ -46,6 +46,59 @@ make dev              # web → http://localhost:3000   ·   api → http://loca
 | `make ai-backup` | AI transcript + prompt loglarını `ai_usage/` altına topla |
 | `make help` | tüm komutlar |
 
+## 🐳 Docker ile Çalıştırma
+
+Üç komutla tüm stack ayağa kalkar (api :8000 + web :3000):
+
+```bash
+make docker-build    # api + web image'larını build (~2-3 dk, cache'li sonrakiler hızlı)
+make docker-up       # servisleri arka planda başlat
+make docker-down     # durdur (named volume korunur, veri kaybı yok)
+```
+
+Alternatif ham komutlar (`Makefile` kullanmadan):
+
+```bash
+docker compose build
+docker compose up -d
+docker compose down
+```
+
+Uçtan uca doğrulama için:
+
+```bash
+make docker-smoke    # down -v → build → up → curl health + web → logs → down
+```
+
+**Portlar:**
+
+| Servis | URL |
+|--------|-----|
+| Web (Next.js) | http://localhost:3000 |
+| API (FastAPI) | http://localhost:8000 |
+| API docs (Swagger) | http://localhost:8000/docs |
+| API health | http://localhost:8000/health |
+
+**Volume'ler:**
+
+| Mount | Tip | Açıklama |
+|-------|-----|----------|
+| `magna-sqlite-data:/app/var` | named | SQLite DB (`app.db`), kalıcı — container düşse bile veri korunur |
+| `./data:/app/data:ro` | bind (RO) | `production_data.csv` seed için (sadece okunur) |
+
+**Environment:**
+
+- `AUTO_SEED=0` (default, compose'da) → container ayağa kalkınca seed yapılmaz
+- `AUTO_SEED=1` → ilk açılışta CSV otomatik import edilir (idempotent, file_hash dedup)
+
+**Dev mode (live reload):**
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+```
+
+Bind mount + `--reload` + `next dev` ile source değişiklikleri anında yansır.
+
 ## ⚙️ Mimari Kararlar
 
 | Karar | Seçim | Kısa Gerekçe |

@@ -39,20 +39,16 @@ export function SyncPage() {
       const g = groups.find((x) => x.idempotency_key === key);
       if (g) targets.push({ production_date: g.production_date, shift: g.shift });
     }
-    if (targets.length === 1) {
-      submit.mutate({
-        production_date: targets[0].production_date,
-        shift: targets[0].shift,
-        force,
-      });
-    } else {
-      submit.mutate({ force });
-    }
+    if (targets.length === 0) return;
+    // Yalnız seçilen grup(lar) gönderilir — seçim ne olursa olsun "hepsi" gitmez.
+    submit.mutate({ targets, force });
   };
 
   return (
     <main className="container mx-auto py-8">
-      <header className="mb-6 flex items-end justify-between">
+      {/* Aksiyon başlığı (Gönder butonu dahil) scroll'da sabit kalır. top-14:
+          global Header h-14 olduğu için onun hemen altına yapışır; z-20 < Header z-30. */}
+      <header className="sticky top-14 z-20 mb-6 flex flex-wrap items-end justify-between gap-3 border-b bg-background/95 py-4 backdrop-blur supports-[backdrop-filter]:bg-background/80">
         <div>
           <p className="font-mono text-sm text-muted-foreground">MAGNA · Hedef API Senkronizasyonu</p>
           <h1 className="mt-1 text-3xl font-bold tracking-tight">Sync</h1>

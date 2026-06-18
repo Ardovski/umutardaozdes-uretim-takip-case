@@ -46,14 +46,27 @@ class SubmissionOut(BaseModel):
     response_body: str | None = None
 
 
+class SubmitTarget(BaseModel):
+    """UI'da seçilen tek bir (gün, vardiya) grubu. `SubmitRequest.targets` listesinin elemanı."""
+
+    production_date: dt.date
+    shift: int
+
+
 class SubmitRequest(BaseModel):
     production_date: dt.date | None = None
     shift: int | None = None
+    # Birden çok (gün, vardiya) seçimi için: doluysa yalnız bu grup(lar) gönderilir.
+    # Boş/None ise tek (production_date, shift) ya da (ikisi de yoksa) tüm gruplar.
+    targets: list[SubmitTarget] | None = None
     force: bool = Field(default=False)
 
 
 class SubmitResponse(BaseModel):
-    accepted: list[int] = Field(default_factory=list)
+    # `accepted` idempotency_key (örn. "2025-11-05:1") tutar → str. Eskiden yanlışlıkla
+    # list[int] idi; "2025-11-05:1" int'e cast edilemediği için yanıt serileştirme hatası
+    # riski vardı (frontend tipi de string[]).
+    accepted: list[str] = Field(default_factory=list)
     skipped_already_success: list[str] = Field(default_factory=list)
     rejected_due_to_hash_conflict: list[str] = Field(default_factory=list)
     submission_ids: list[int] = Field(default_factory=list)

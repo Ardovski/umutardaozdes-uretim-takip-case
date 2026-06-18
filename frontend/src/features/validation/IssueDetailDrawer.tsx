@@ -18,8 +18,10 @@ export function IssueDetailDrawer({ issue, onClose }: IssueDetailDrawerProps) {
   const edits = useRecordEdits(issue?.record_id ?? 0);
   if (issue === null) return null;
   return (
+    // Okunabilirlik: koyu + blur arka plan paneli net ayırır. İçeride etiketler
+    // muted, değerler `text-foreground` → düşük kontrast/"belirsiz" görünüm giderildi.
     <div
-      className="fixed inset-0 z-40 flex justify-end bg-black/30"
+      className="fixed inset-0 z-40 flex justify-end bg-black/60 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
       onClick={onClose}
@@ -43,20 +45,21 @@ export function IssueDetailDrawer({ issue, onClose }: IssueDetailDrawerProps) {
               <Badge tone="outline">{issue.category}</Badge>
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2 text-sm">
+          <CardContent className="space-y-2 text-sm text-card-foreground">
             <p>
-              <span className="text-muted-foreground">Mesaj:</span> {issue.message}
+              <span className="font-medium text-muted-foreground">Mesaj:</span>{" "}
+              <span className="text-foreground">{issue.message}</span>
             </p>
             <p>
-              <span className="text-muted-foreground">Alanlar:</span>{" "}
-              <span className="font-mono text-xs">{issue.fields ?? "—"}</span>
+              <span className="font-medium text-muted-foreground">Alanlar:</span>{" "}
+              <span className="font-mono text-xs text-foreground">{issue.fields ?? "—"}</span>
             </p>
             <p>
-              <span className="text-muted-foreground">Öneri:</span>{" "}
+              <span className="font-medium text-muted-foreground">Öneri:</span>{" "}
               <Badge tone="outline">{issue.suggested_action}</Badge>
             </p>
             <p>
-              <span className="text-muted-foreground">Durum:</span>{" "}
+              <span className="font-medium text-muted-foreground">Durum:</span>{" "}
               <Badge tone="outline">{issue.status}</Badge>
             </p>
             <p className="text-xs text-muted-foreground">

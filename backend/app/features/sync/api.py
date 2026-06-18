@@ -1,6 +1,7 @@
 """Sync API router."""
 from __future__ import annotations
 
+import datetime as dt
 from typing import Annotated
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
@@ -31,13 +32,23 @@ def submit_endpoint(
     background: BackgroundTasks,
     db: Session = Depends(get_db),
 ) -> SubmitResponse:
-    if payload.production_date is not None and payload.shift is not None:
-        if int(payload.shift) not in (1, 2, 3):
-            raise HTTPException(status_code=422, detail="shift 1/2/3 olmalı")
+    if (
+        payload.production_date is not None
+        and payload.shift is not None
+        and int(payload.shift) not in (1, 2, 3)
+    ):
+        raise HTTPException(status_code=422, detail="shift 1/2/3 olmalı")
+    targets: list[tuple[dt.date, int]] | None = None
+    if payload.targets:
+        for t in payload.targets:
+            if int(t.shift) not in (1, 2, 3):
+                raise HTTPException(status_code=422, detail="shift 1/2/3 olmalı")
+        targets = [(t.production_date, int(t.shift)) for t in payload.targets]
     response = submit(
         db,
         production_date=payload.production_date,
         shift=payload.shift,
+        targets=targets,
         force=payload.force,
     )
     if response.submission_ids:

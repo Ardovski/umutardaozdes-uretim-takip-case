@@ -30,9 +30,17 @@ export interface SubmissionOut {
   response_body: string | null;
 }
 
+/** UI'da seçilen tek bir (gün, vardiya) grubu — `SubmitRequest.targets` elemanı. */
+export interface SubmitTarget {
+  production_date: string;
+  shift: number;
+}
+
 export interface SubmitRequest {
   production_date?: string | null;
   shift?: number | null;
+  /** Çoklu seçim: doluysa yalnız bu grup(lar) gönderilir (boşsa eski tek/all davranışı). */
+  targets?: SubmitTarget[];
   force?: boolean;
 }
 

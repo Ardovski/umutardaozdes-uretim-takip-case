@@ -184,10 +184,18 @@ def submit(
     db: Session,
     production_date: dt.date | None = None,
     shift: int | None = None,
+    targets: list[tuple[dt.date, int]] | None = None,
     force: bool = False,
 ) -> SubmitResponse:
     response = SubmitResponse()
-    if production_date is not None and shift is not None:
+    if targets:
+        # Kullanıcının seçtiği belirli (gün, vardiya) grupları — sadece bunlar gider.
+        groups = [
+            g
+            for (d, s) in targets
+            if (g := build_group(db, d, s)) is not None
+        ]
+    elif production_date is not None and shift is not None:
         group = build_group(db, production_date, shift)
         if group is None:
             return response

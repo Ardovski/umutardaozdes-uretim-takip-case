@@ -76,14 +76,21 @@ export function HistoryTable() {
                 <td className="p-2 font-mono">{s.target_submission_id ?? "—"}</td>
                 <td className="p-2">
                   {s.status === "failed" || s.status === "retrying" ? (
-                    <button
-                      type="button"
-                      className="rounded-md border bg-background px-2 py-1 text-xs text-foreground disabled:opacity-50"
-                      disabled={retry.isPending}
-                      onClick={() => retry.mutate(s.id)}
-                    >
-                      {retry.isPending ? "…" : "Retry"}
-                    </button>
+                    (() => {
+                      // Pending state'i yalnız tıklanan satıra bağla — aksi halde
+                      // tek retry tüm satırların butonunu "…" yapardı.
+                      const isThisRetrying = retry.isPending && retry.variables === s.id;
+                      return (
+                        <button
+                          type="button"
+                          className="rounded-md border bg-background px-2 py-1 text-xs text-foreground disabled:opacity-50"
+                          disabled={isThisRetrying}
+                          onClick={() => retry.mutate(s.id)}
+                        >
+                          {isThisRetrying ? "…" : "Retry"}
+                        </button>
+                      );
+                    })()
                   ) : null}
                 </td>
               </tr>

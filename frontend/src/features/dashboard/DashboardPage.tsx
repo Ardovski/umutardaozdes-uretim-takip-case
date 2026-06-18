@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useActiveBatch } from "@/hooks/useActiveBatch";
 import { DashboardHeader } from "./DashboardHeader";
 import { KpiCardGrid } from "./KpiCardGrid";
 import { OeeTrendChart } from "./OeeTrendChart";
@@ -14,8 +13,9 @@ import { StationRankingChart } from "./StationRankingChart";
 import { TopStationsTable } from "./TopStationsTable";
 
 export function DashboardPage() {
-  const active = useActiveBatch();
-  const batchId: number | null = active.data?.id ?? null;
+  // Tüm dashboard (KPI + grafikler) aktif batch'e bakmaz; aşağıdaki 3 tablo da
+  // aynı veri kümesini göstermeli. batchId=null → tüm kayıtlar (tutarlı görünüm).
+  const batchId: number | null = null;
   const [tab, setTab] = useState("recent");
 
   return (

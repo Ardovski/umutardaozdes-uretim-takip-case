@@ -42,34 +42,44 @@ def issues(
     category: IssueCategory | None = None,
     severity: IssueSeverity | None = None,
     rule_id: str | None = None,
+    record_status: str | None = None,
     db: Session = Depends(get_db),
 ) -> list[dict[str, object]]:
-    rows = db.execute(
-        select(models.ValidationIssue).order_by(models.ValidationIssue.id.desc())
-    ).scalars().all()
+    # Issue'lar `validation_issues` tablosunda kalıcı tutulmuyor; tek doğruluk
+    # kaynağı motorun anlık çıktısıdır (summary/report ile aynı yol). Bu yüzden
+    # tabloyu okumak yerine `run_validation` sonucunu düzleştirip döneriz —
+    # aksi halde liste her zaman boş gelir.
+    results = run_validation(db)
+    db.commit()
     out: list[dict[str, object]] = []
-    for r in rows:
-        if category is not None and r.category != category:
+    next_id = 1
+    for record_id, result in results.items():
+        rec_status = result.status.value
+        if record_status is not None and rec_status != record_status:
             continue
-        if severity is not None and r.severity != severity:
-            continue
-        if rule_id is not None and r.rule_id != rule_id:
-            continue
-        out.append(
-            {
-                "id": r.id,
-                "record_id": r.record_id,
-                "rule_id": r.rule_id,
-                "category": r.category,
-                "severity": r.severity,
-                "fields": r.field_names,
-                "message": r.message,
-                "suggested_action": r.suggested_action,
-                "detected_at": r.detected_at.isoformat() if r.detected_at else None,
-                "fixed_at": r.fixed_at.isoformat() if r.fixed_at else None,
-                "status": r.status,
-            }
-        )
+        for issue in result.issues:
+            if category is not None and issue.category != category:
+                continue
+            if severity is not None and issue.severity != severity:
+                continue
+            if rule_id is not None and issue.rule_id != rule_id:
+                continue
+            out.append(
+                {
+                    "id": next_id,
+                    "record_id": record_id,
+                    "rule_id": issue.rule_id,
+                    "category": issue.category.value,
+                    "severity": issue.severity.value,
+                    "fields": ", ".join(issue.fields) if issue.fields else None,
+                    "message": issue.message,
+                    "suggested_action": issue.suggested_action.value,
+                    "detected_at": None,
+                    "fixed_at": None,
+                    "status": rec_status,
+                }
+            )
+            next_id += 1
     return out
 
 

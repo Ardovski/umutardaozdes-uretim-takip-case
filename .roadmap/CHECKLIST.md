@@ -3,7 +3,7 @@
 > Tek bakışta ilerleme. `[x]` yapıldı · `[ ]` yapılmadı · `[~]` kısmen/devam.
 > Her madde case study gereksinimine bağlı; güncel tutulur.
 
-**Son güncelleme:** 2026-06-18
+**Son güncelleme:** 2026-06-19
 
 ---
 
@@ -37,13 +37,13 @@
 ## Faz 1 — Veri İçe Aktarma (Import) · 5.1
 - [x] CSV seç (drag-and-drop **veya** file picker) — `ImportDropzone` (drag + "Dosya Seç")
 - [x] Yükleme öncesi önizleme (ilk 10 satır) — `POST /api/v1/imports/preview`
-- [~] Yükleme sırasında ilerleme durumu — yükleme spinner'ı var, yüzde göstergesi yok
+- [x] Yükleme sırasında ilerleme durumu — yüzde göstergeli progress bar (`ImportProgress`, XHR upload %)
 - [x] CSV parse (pandas) + normalize (tarih/ondalık/yüzde ölçeği)
 - [x] SQLite'a import (`import_batches` + `production_records`)
 - [x] `file_hash` ile aynı dosya duplicate kontrolü
 - [x] Import özeti: toplam / başarılı / reddedilen+sebep / şüpheli (`ImportSummaryPanel`)
 - [x] Import özetinde **kalite sorunları dökümü** (kategori + severity) — import'ta otomatik validasyon
-- [ ] *(Tercih)* Birden fazla CSV birleştirip yükleme
+- [x] *(Tercih)* Birden fazla CSV birleştirip yükleme — `ImportDropzone` (multiple) + `mergeSummaries`
 
 ## Faz 2 — Validasyon Motoru · 5.4 (kritik · ağırlık %25)
 - [x] Kural motoru (`engine.py`) — saf fonksiyon kuralları, iki geçiş (row + batch)
@@ -69,6 +69,9 @@
 - [x] Vardiya bazlı performans karşılaştırma (bar)
 - [x] İş istasyonu bazlı OEE sıralaması (yatay bar, top 10)
 - [x] Fire oranı (Quality) dağılımı — 10 bucket histogram
+- [x] Son Kayıtlar tablosu (sekme; TanStack Table — sıralanabilir) — *2026-06-19 düzeltildi: tüm veriye hizalandı*
+- [x] Top İstasyonlar tablosu (sekme; OEE'ye göre) — *2026-06-19 düzeltildi*
+- [x] Sorunlu Vardiyalar tablosu (sekme; düşük OEE / rejected) — *2026-06-19 düzeltildi*
 
 ## Faz 4 — Filtreleme & Kayıtlar · 5.2
 - [x] Tarih aralığı (başlangıç–bitiş)
@@ -133,6 +136,26 @@
 - [ ] Alembic şema migration
 - [ ] CI/CD pipeline (GitHub Actions)
 
+## Hata Düzeltme & İyileştirme Turu — 2026-06-19
+
+> Var olan özelliklerdeki davranış/görsel hatalar; UI testinde yakalandı.
+
+- [x] **Dashboard tabloları gelmiyordu** — 3 tablo (Son Kayıtlar/Top İstasyonlar/Sorunlu
+  Vardiyalar) aktif batch'e göre filtreleniyor, KPI/grafikler filtrelemiyordu. Bir batch
+  aktifken tablolar boş kalıyordu → hepsi tüm veri kümesine hizalandı (`DashboardPage`).
+- [x] **Validation "issue" listesi boş geliyordu** — `/validation/issues` kalıcı tutulmayan
+  `validation_issues` tablosunu okuyordu (hep `[]`). `run_validation` anlık çıktısını
+  düzleştirir hale getirildi + `record_status` filtresi eklendi (frontend gönderiyordu).
+- [x] **Sorun pop-up (IssueDetailDrawer) metin kontrastı düşüktü** — koyu+blur arka plan,
+  etiket/değer kontrastı netleştirildi (`text-foreground`).
+- [x] **Sync seçim her zaman 54 gönderiyordu** — çoklu seçimde `{force}` ile *tümü*
+  gidiyordu. Backend'e `targets[]` (gün, vardiya) eklendi; UI tam seçileni gönderir.
+- [x] **Sync aksiyon başlığı (Gönder) scroll'da sabit** — `sticky top-14` (global header altı).
+- [x] **Sync "Retry" tüm satırları tetikliyordu** — pending durumu yalnız tıklanan satıra
+  bağlandı (`retry.variables === s.id`).
+- [x] **Yan düzeltme:** `SubmitResponse.accepted` tipi `list[int]` → `list[str]` (idempotency
+  key string; serileştirme hatası riski giderildi, frontend tipiyle uyumlu).
+
 ---
 
 ### İlerleme Özeti
@@ -140,10 +163,11 @@
 | Faz | Tamamlanan / Toplam |
 |-----|---------------------|
 | Faz 0 | 26 / 26 ✅ |
-| Faz 1 | 7 / 9 (drag-drop/önizleme/import/duplicate/kalite-dökümü ✅; progress ~ ; çoklu-CSV ❌) |
+| Faz 1 | 9 / 9 ✅ (progress bar + çoklu-CSV tamamlandı) |
 | Faz 2 | 14 / 16 (motor + 47 kural + otomatik validasyon ✅; tüm-kural pytest ~) |
-| Faz 3 | 6 / 6 ✅ |
+| Faz 3 | 9 / 9 ✅ (3 dashboard tablosu eklendi + düzeltildi) |
 | Faz 4 | 9 / 9 ✅ |
 | Faz 5 | 12 / 13 (circuit breaker ❌) |
 | Faz 6 | 13 / 15 (ekran görüntüleri + push sonrası kontrol) |
 | Bonus | 2 / 11 |
+| Düzeltme Turu (2026-06-19) | 7 / 7 ✅ |

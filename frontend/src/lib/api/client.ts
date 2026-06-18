@@ -38,6 +38,46 @@ async function apiFetch<T>(path: string, options: RequestOptions = {}): Promise<
   return data as T;
 }
 
+/**
+ * Multipart yükleme — gerçek yükleme ilerlemesi (%) ile (XMLHttpRequest).
+ * fetch upload progress'i desteklemediği için XHR kullanılır.
+ * onProgress: 0–100 (yalnız yükleme fazı; sunucu işleme fazında 100'de bekler).
+ */
+function uploadWithProgress<T>(
+  path: string,
+  form: FormData,
+  onProgress?: (percent: number) => void,
+): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", `${env.apiUrl}${path}`);
+    xhr.responseType = "text";
+
+    xhr.upload.onprogress = (e) => {
+      if (onProgress && e.lengthComputable) {
+        onProgress(Math.round((e.loaded / e.total) * 100));
+      }
+    };
+
+    xhr.onload = () => {
+      const ct = xhr.getResponseHeader("content-type") ?? "";
+      const isJson = ct.includes("application/json");
+      const data = isJson && xhr.responseText ? JSON.parse(xhr.responseText) : xhr.responseText;
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve(data as T);
+      } else {
+        const err = (data as { error?: { code?: string; message?: string; detail?: unknown } })
+          ?.error;
+        reject(
+          new ApiError(xhr.status, err?.message ?? xhr.statusText, err?.code, err?.detail ?? data),
+        );
+      }
+    };
+    xhr.onerror = () => reject(new ApiError(0, "Ağ hatası (yükleme başarısız)"));
+    xhr.send(form);
+  });
+}
+
 export const api = {
   get: <T>(path: string) => apiFetch<T>(path),
   post: <T>(path: string, body?: unknown) => apiFetch<T>(path, { method: "POST", body }),
@@ -45,4 +85,6 @@ export const api = {
   delete: <T = void>(path: string) => apiFetch<T>(path, { method: "DELETE" }),
   /** Multipart CSV yükleme — Content-Type'ı tarayıcı (boundary ile) ayarlar. */
   upload: <T>(path: string, form: FormData) => apiFetch<T>(path, { method: "POST", body: form }),
+  /** İlerleme (%) raporlayan multipart yükleme. */
+  uploadWithProgress,
 };

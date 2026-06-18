@@ -9,6 +9,28 @@ export interface BatchOut {
   is_active: boolean;
 }
 
+export interface PreviewRow {
+  record_id_src: number | null;
+  prod_date: string | null;
+  work_order_no: string | null;
+  station_name: string | null;
+  stock_name: string | null;
+  shift: number | null;
+  oee: number | null;
+  produced_qty: number | null;
+  scrap_qty: number | null;
+  parse_warnings: string[];
+}
+
+export interface ImportPreview {
+  filename: string;
+  file_hash: string;
+  total_rows: number;
+  sample: PreviewRow[];
+  detected_columns: string[];
+  encoding: string;
+}
+
 export interface ImportValidation {
   validated_records: number;
   valid: number;

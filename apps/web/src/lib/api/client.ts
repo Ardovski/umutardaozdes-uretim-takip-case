@@ -42,6 +42,7 @@ export const api = {
   get: <T>(path: string) => apiFetch<T>(path),
   post: <T>(path: string, body?: unknown) => apiFetch<T>(path, { method: "POST", body }),
   patch: <T>(path: string, body?: unknown) => apiFetch<T>(path, { method: "PATCH", body }),
+  delete: <T = void>(path: string) => apiFetch<T>(path, { method: "DELETE" }),
   /** Multipart CSV yükleme — Content-Type'ı tarayıcı (boundary ile) ayarlar. */
   upload: <T>(path: string, form: FormData) => apiFetch<T>(path, { method: "POST", body: form }),
 };

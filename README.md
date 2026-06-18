@@ -46,6 +46,28 @@ make dev              # web → http://localhost:3000   ·   api → http://loca
 | `make ai-backup` | AI transcript + prompt loglarını `ai_usage/` altına topla |
 | `make help` | tüm komutlar |
 
+### Case §7.2 — birebir komutlar (Makefile'sız)
+
+Case'teki örnek komut bloğu da doğrudan çalışır. Repo kökündeki `backend/` ve
+`frontend/` birer **symlink**'tir (`backend → apps/api`, `frontend → apps/web`);
+`apps/api/main.py` ise gerçek uygulamayı (`app.main:app`) yeniden export eden ince
+bir shim'dir. Böylece şu komutlar Makefile olmadan da çalışır:
+
+```bash
+cp .env.example .env
+
+# Backend
+cd backend && pip install -r requirements.txt
+uvicorn main:app --reload            # → http://localhost:8000/docs
+
+# Frontend (ayrı terminal)
+cd frontend && npm install && npm run dev
+```
+
+> **Port notu:** Frontend **Next.js** olduğu için geliştirme sunucusu
+> `http://localhost:3000`'de açılır (case örneğindeki Vite varsayılanı 5173 değil).
+> Tek komutla her ikisini başlatmak için önerilen yol yine `make dev`'dir.
+
 ## 🐳 Docker ile Çalıştırma
 
 Üç komutla tüm stack ayağa kalkar (api :8000 + web :3000):

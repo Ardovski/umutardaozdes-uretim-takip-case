@@ -3,9 +3,9 @@ from __future__ import annotations
 
 import datetime as dt
 from collections.abc import AsyncIterator
-from typing import Annotated, Optional
+from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, Query
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
@@ -20,20 +20,19 @@ from app.features.records.service import (
     stream_records,
 )
 
-
 router = APIRouter()
 
 
 def _build_filter(
-    start: Annotated[Optional[dt.date], Query()] = None,
-    end: Annotated[Optional[dt.date], Query()] = None,
+    start: Annotated[dt.date | None, Query()] = None,
+    end: Annotated[dt.date | None, Query()] = None,
     shift: Annotated[list[int] | None, Query()] = None,
     station_name: Annotated[list[str] | None, Query()] = None,
-    stock_name: Annotated[Optional[str], Query()] = None,
-    oee_min: Annotated[Optional[float], Query()] = None,
-    oee_max: Annotated[Optional[float], Query()] = None,
+    stock_name: Annotated[str | None, Query()] = None,
+    oee_min: Annotated[float | None, Query()] = None,
+    oee_max: Annotated[float | None, Query()] = None,
     validation_status: Annotated[list[str] | None, Query()] = None,
-    has_issues: Annotated[Optional[bool], Query()] = None,
+    has_issues: Annotated[bool | None, Query()] = None,
 ) -> RecordFilter:
     return RecordFilter(
         prod_date_range=DateRange(start=start, end=end) if (start or end) else None,
@@ -48,18 +47,18 @@ def _build_filter(
 
 @router.get("/list", response_model=PaginatedRecords)
 def list_(
-    start: Annotated[Optional[dt.date], Query()] = None,
-    end: Annotated[Optional[dt.date], Query()] = None,
+    start: Annotated[dt.date | None, Query()] = None,
+    end: Annotated[dt.date | None, Query()] = None,
     shift: Annotated[list[int] | None, Query()] = None,
     station_name: Annotated[list[str] | None, Query()] = None,
-    stock_name: Annotated[Optional[str], Query()] = None,
-    oee_min: Annotated[Optional[float], Query()] = None,
-    oee_max: Annotated[Optional[float], Query()] = None,
+    stock_name: Annotated[str | None, Query()] = None,
+    oee_min: Annotated[float | None, Query()] = None,
+    oee_max: Annotated[float | None, Query()] = None,
     validation_status: Annotated[list[str] | None, Query()] = None,
-    has_issues: Annotated[Optional[bool], Query()] = None,
+    has_issues: Annotated[bool | None, Query()] = None,
     page: int = Query(1, ge=1),
     size: int = Query(50, ge=1, le=500),
-    sort: Optional[str] = None,
+    sort: str | None = None,
     db: Session = Depends(get_db),
 ) -> PaginatedRecords:
     flt = _build_filter(
@@ -74,16 +73,16 @@ def list_(
 
 @router.get("/export")
 def export(
-    start: Annotated[Optional[dt.date], Query()] = None,
-    end: Annotated[Optional[dt.date], Query()] = None,
+    start: Annotated[dt.date | None, Query()] = None,
+    end: Annotated[dt.date | None, Query()] = None,
     shift: Annotated[list[int] | None, Query()] = None,
     station_name: Annotated[list[str] | None, Query()] = None,
-    stock_name: Annotated[Optional[str], Query()] = None,
-    oee_min: Annotated[Optional[float], Query()] = None,
-    oee_max: Annotated[Optional[float], Query()] = None,
+    stock_name: Annotated[str | None, Query()] = None,
+    oee_min: Annotated[float | None, Query()] = None,
+    oee_max: Annotated[float | None, Query()] = None,
     validation_status: Annotated[list[str] | None, Query()] = None,
-    has_issues: Annotated[Optional[bool], Query()] = None,
-    sort: Optional[str] = None,
+    has_issues: Annotated[bool | None, Query()] = None,
+    sort: str | None = None,
     db: Session = Depends(get_db),
 ) -> StreamingResponse:
     flt = _build_filter(

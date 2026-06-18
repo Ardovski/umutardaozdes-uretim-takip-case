@@ -1,8 +1,6 @@
 """Records service — filtre query builder + paginated list + detail."""
 from __future__ import annotations
 
-import datetime as dt
-from collections.abc import Sequence
 from typing import Any
 
 from sqlalchemy import and_, func, or_, select
@@ -16,7 +14,6 @@ from app.features.records.schemas import (
     RecordFilter,
     RecordOut,
 )
-
 
 _SORT_FIELD_MAP: dict[str, Any] = {
     "id": models.ProductionRecord.id,

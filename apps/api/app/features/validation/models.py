@@ -1,12 +1,12 @@
 """Validation domain modelleri — Enum + Issue + record status türetme."""
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass, field
-from enum import Enum
-from typing import Sequence
+from enum import StrEnum
 
 
-class IssueCategory(str, Enum):
+class IssueCategory(StrEnum):
     MISSING = "missing"
     RANGE = "range"
     CONSISTENCY = "consistency"
@@ -15,19 +15,19 @@ class IssueCategory(str, Enum):
     DOMAIN = "domain"
 
 
-class IssueSeverity(str, Enum):
+class IssueSeverity(StrEnum):
     ERROR = "error"
     WARNING = "warning"
     INFO = "info"
 
 
-class SuggestedAction(str, Enum):
+class SuggestedAction(StrEnum):
     REJECT = "reject"
     WARN = "warn"
     FIX = "fix"
 
 
-class RecordStatus(str, Enum):
+class RecordStatus(StrEnum):
     VALID = "valid"
     SUSPECT = "suspect"
     REJECTED = "rejected"

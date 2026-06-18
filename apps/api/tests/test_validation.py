@@ -5,7 +5,6 @@ import datetime as dt
 from typing import Any
 
 import pytest
-
 from app.db import models
 from app.features.validation.engine import run_validation
 from app.features.validation.models import (
@@ -176,23 +175,23 @@ def test_engine_runs_and_assigns_status(db) -> None:
 
 
 def test_engine_batch_vd02_and_vx05(db) -> None:
-    base_row = dict(
-        prod_date=dt.date(2025, 11, 7),
-        shift=1,
-        station_name="IMM-2700-3",
-        work_order_no="3021234567",
-        produced_qty=10,
-        scrap_qty=1,
-        availability=85.0,
-        performance=90.0,
-        quality=95.0,
-        oee=72.7,
-        run_time=5.0,
-        down_time=0.5,
-        planned_down=0.3,
-        unplanned_down=0.2,
-        status="valid",
-    )
+    base_row = {
+        "prod_date": dt.date(2025, 11, 7),
+        "shift": 1,
+        "station_name": "IMM-2700-3",
+        "work_order_no": "3021234567",
+        "produced_qty": 10,
+        "scrap_qty": 1,
+        "availability": 85.0,
+        "performance": 90.0,
+        "quality": 95.0,
+        "oee": 72.7,
+        "run_time": 5.0,
+        "down_time": 0.5,
+        "planned_down": 0.3,
+        "unplanned_down": 0.2,
+        "status": "valid",
+    }
     for i in range(49):
         db.add(models.ProductionRecord(
             row_hash=f"r_{i}", **{**base_row, "record_id_src": i, "produced_qty": 10}

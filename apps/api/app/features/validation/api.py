@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import json
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -12,13 +12,10 @@ from app.db import models
 from app.db.session import get_db
 from app.features.validation.engine import run_validation, summarize
 from app.features.validation.models import (
-    Issue,
     IssueCategory,
     IssueSeverity,
-    SuggestedAction,
 )
 from app.features.validation.report import full_report
-
 
 router = APIRouter()
 

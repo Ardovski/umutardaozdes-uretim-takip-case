@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import datetime as dt
 import re
-from typing import Optional
 
 _DATE_FORMATS: tuple[str, ...] = (
     "%Y-%m-%d",
@@ -13,7 +12,7 @@ _DATE_FORMATS: tuple[str, ...] = (
 )
 
 
-def _detect_date(value: object) -> Optional[dt.date]:
+def _detect_date(value: object) -> dt.date | None:
     if value is None:
         return None
     if isinstance(value, dt.datetime):
@@ -47,7 +46,7 @@ def _detect_date(value: object) -> Optional[dt.date]:
 _DECIMAL_RE = re.compile(r"^-?\d+(?:[.,]\d+)?$")
 
 
-def _to_float(value: object) -> Optional[float]:
+def _to_float(value: object) -> float | None:
     if value is None:
         return None
     if isinstance(value, (int, float)):
@@ -66,14 +65,14 @@ def _to_float(value: object) -> Optional[float]:
         return None
 
 
-def _to_int(value: object) -> Optional[int]:
+def _to_int(value: object) -> int | None:
     f = _to_float(value)
     if f is None:
         return None
     return int(f)
 
 
-def _normalize_str(value: object, *, lower: bool = True) -> Optional[str]:
+def _normalize_str(value: object, *, lower: bool = True) -> str | None:
     if value is None:
         return None
     text = str(value).strip()
@@ -84,7 +83,7 @@ def _normalize_str(value: object, *, lower: bool = True) -> Optional[str]:
     return text
 
 
-def _detect_percent_scale(values: list[Optional[float]]) -> tuple[bool, bool]:
+def _detect_percent_scale(values: list[float | None]) -> tuple[bool, bool]:
     has_in_unit: bool = False
     has_hundred: bool = False
     for v in values:
@@ -97,7 +96,7 @@ def _detect_percent_scale(values: list[Optional[float]]) -> tuple[bool, bool]:
     return has_in_unit, has_hundred
 
 
-def _rescale_to_percent(values: list[Optional[float]]) -> list[Optional[float]]:
+def _rescale_to_percent(values: list[float | None]) -> list[float | None]:
     has_in_unit, has_hundred = _detect_percent_scale(values)
     if has_in_unit and not has_hundred:
         return [None if v is None else round(v * 100.0, 4) for v in values]
@@ -230,9 +229,9 @@ def normalize_row(raw: dict[str, object]) -> dict[str, object]:
 def rescale_percent_columns(rows: list[dict[str, object]]) -> None:
     for col in _COLUMNS_PERCENT:
         col_values = [r.get(col) for r in rows]
-        col_values_float: list[Optional[float]] = [
+        col_values_float: list[float | None] = [
             v if isinstance(v, (int, float)) else None for v in col_values
         ]
         rescaled = _rescale_to_percent(col_values_float)
-        for r, v in zip(rows, rescaled):
+        for r, v in zip(rows, rescaled, strict=False):
             r[col] = v

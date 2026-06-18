@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import datetime as dt
-import re
 from typing import Any
 
 from app.features.validation.models import (

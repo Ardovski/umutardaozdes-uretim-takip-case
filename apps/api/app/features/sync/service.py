@@ -30,7 +30,6 @@ from app.features.sync.schemas import (
     SyncPreview,
 )
 
-
 _logger = logging.getLogger("sync.service")
 
 

@@ -1,9 +1,8 @@
-"""Analytics API router — KPI + 4 grafik endpoint'i."""
+"""Analytics API router — KPI + 4 grafik + 3 dashboard tablo endpoint'i."""
 from __future__ import annotations
 
 import datetime as dt
-from collections.abc import Iterable
-from typing import Annotated, Optional, get_args
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
@@ -12,27 +11,29 @@ from app.db.session import get_db
 from app.features.analytics.service import (
     kpis,
     oee_trend,
+    problem_shifts,
     quality_distribution,
+    recent_records,
     shift_comparison,
     station_ranking,
+    top_stations,
 )
 from app.features.records.schemas import DateRange, OeeRange, RecordFilter
 from app.features.records.service import distinct_values
-
 
 router = APIRouter()
 
 
 def _parse_filters(
-    start: Optional[dt.date],
-    end: Optional[dt.date],
+    start: dt.date | None,
+    end: dt.date | None,
     shift: list[int] | None,
     station_name: list[str] | None,
-    stock_name: Optional[str],
-    oee_min: Optional[float],
-    oee_max: Optional[float],
+    stock_name: str | None,
+    oee_min: float | None,
+    oee_max: float | None,
     validation_status: list[str] | None,
-    has_issues: Optional[bool],
+    has_issues: bool | None,
 ) -> RecordFilter:
     return RecordFilter(
         prod_date_range=DateRange(start=start, end=end) if (start or end) else None,
@@ -47,15 +48,15 @@ def _parse_filters(
 
 @router.get("/kpis")
 def kpis_endpoint(
-    start: Annotated[Optional[dt.date], Query()] = None,
-    end: Annotated[Optional[dt.date], Query()] = None,
+    start: Annotated[dt.date | None, Query()] = None,
+    end: Annotated[dt.date | None, Query()] = None,
     shift: Annotated[list[int] | None, Query()] = None,
     station_name: Annotated[list[str] | None, Query()] = None,
-    stock_name: Annotated[Optional[str], Query()] = None,
-    oee_min: Annotated[Optional[float], Query()] = None,
-    oee_max: Annotated[Optional[float], Query()] = None,
+    stock_name: Annotated[str | None, Query()] = None,
+    oee_min: Annotated[float | None, Query()] = None,
+    oee_max: Annotated[float | None, Query()] = None,
     validation_status: Annotated[list[str] | None, Query()] = None,
-    has_issues: Annotated[Optional[bool], Query()] = None,
+    has_issues: Annotated[bool | None, Query()] = None,
     db: Session = Depends(get_db),
 ) -> dict[str, object]:
     flt = _parse_filters(start, end, shift, station_name, stock_name, oee_min, oee_max, validation_status, has_issues)
@@ -64,15 +65,15 @@ def kpis_endpoint(
 
 @router.get("/oee-trend")
 def oee_trend_endpoint(
-    start: Annotated[Optional[dt.date], Query()] = None,
-    end: Annotated[Optional[dt.date], Query()] = None,
+    start: Annotated[dt.date | None, Query()] = None,
+    end: Annotated[dt.date | None, Query()] = None,
     shift: Annotated[list[int] | None, Query()] = None,
     station_name: Annotated[list[str] | None, Query()] = None,
-    stock_name: Annotated[Optional[str], Query()] = None,
-    oee_min: Annotated[Optional[float], Query()] = None,
-    oee_max: Annotated[Optional[float], Query()] = None,
+    stock_name: Annotated[str | None, Query()] = None,
+    oee_min: Annotated[float | None, Query()] = None,
+    oee_max: Annotated[float | None, Query()] = None,
     validation_status: Annotated[list[str] | None, Query()] = None,
-    has_issues: Annotated[Optional[bool], Query()] = None,
+    has_issues: Annotated[bool | None, Query()] = None,
     days: int = Query(21, ge=1, le=90),
     db: Session = Depends(get_db),
 ) -> list[dict[str, object]]:
@@ -82,15 +83,15 @@ def oee_trend_endpoint(
 
 @router.get("/shift-comparison")
 def shift_comparison_endpoint(
-    start: Annotated[Optional[dt.date], Query()] = None,
-    end: Annotated[Optional[dt.date], Query()] = None,
+    start: Annotated[dt.date | None, Query()] = None,
+    end: Annotated[dt.date | None, Query()] = None,
     shift: Annotated[list[int] | None, Query()] = None,
     station_name: Annotated[list[str] | None, Query()] = None,
-    stock_name: Annotated[Optional[str], Query()] = None,
-    oee_min: Annotated[Optional[float], Query()] = None,
-    oee_max: Annotated[Optional[float], Query()] = None,
+    stock_name: Annotated[str | None, Query()] = None,
+    oee_min: Annotated[float | None, Query()] = None,
+    oee_max: Annotated[float | None, Query()] = None,
     validation_status: Annotated[list[str] | None, Query()] = None,
-    has_issues: Annotated[Optional[bool], Query()] = None,
+    has_issues: Annotated[bool | None, Query()] = None,
     db: Session = Depends(get_db),
 ) -> list[dict[str, object]]:
     flt = _parse_filters(start, end, shift, station_name, stock_name, oee_min, oee_max, validation_status, has_issues)
@@ -99,15 +100,15 @@ def shift_comparison_endpoint(
 
 @router.get("/station-ranking")
 def station_ranking_endpoint(
-    start: Annotated[Optional[dt.date], Query()] = None,
-    end: Annotated[Optional[dt.date], Query()] = None,
+    start: Annotated[dt.date | None, Query()] = None,
+    end: Annotated[dt.date | None, Query()] = None,
     shift: Annotated[list[int] | None, Query()] = None,
     station_name: Annotated[list[str] | None, Query()] = None,
-    stock_name: Annotated[Optional[str], Query()] = None,
-    oee_min: Annotated[Optional[float], Query()] = None,
-    oee_max: Annotated[Optional[float], Query()] = None,
+    stock_name: Annotated[str | None, Query()] = None,
+    oee_min: Annotated[float | None, Query()] = None,
+    oee_max: Annotated[float | None, Query()] = None,
     validation_status: Annotated[list[str] | None, Query()] = None,
-    has_issues: Annotated[Optional[bool], Query()] = None,
+    has_issues: Annotated[bool | None, Query()] = None,
     limit: int = Query(10, ge=1, le=100),
     db: Session = Depends(get_db),
 ) -> list[dict[str, object]]:
@@ -117,19 +118,46 @@ def station_ranking_endpoint(
 
 @router.get("/quality-distribution")
 def quality_distribution_endpoint(
-    start: Annotated[Optional[dt.date], Query()] = None,
-    end: Annotated[Optional[dt.date], Query()] = None,
+    start: Annotated[dt.date | None, Query()] = None,
+    end: Annotated[dt.date | None, Query()] = None,
     shift: Annotated[list[int] | None, Query()] = None,
     station_name: Annotated[list[str] | None, Query()] = None,
-    stock_name: Annotated[Optional[str], Query()] = None,
-    oee_min: Annotated[Optional[float], Query()] = None,
-    oee_max: Annotated[Optional[float], Query()] = None,
+    stock_name: Annotated[str | None, Query()] = None,
+    oee_min: Annotated[float | None, Query()] = None,
+    oee_max: Annotated[float | None, Query()] = None,
     validation_status: Annotated[list[str] | None, Query()] = None,
-    has_issues: Annotated[Optional[bool], Query()] = None,
+    has_issues: Annotated[bool | None, Query()] = None,
     db: Session = Depends(get_db),
 ) -> list[dict[str, object]]:
     flt = _parse_filters(start, end, shift, station_name, stock_name, oee_min, oee_max, validation_status, has_issues)
     return quality_distribution(db, flt)
+
+
+@router.get("/recent-records")
+def recent_records_endpoint(
+    batch_id: Annotated[int | None, Query()] = None,
+    limit: int = Query(20, ge=1, le=100),
+    db: Session = Depends(get_db),
+) -> list[dict[str, object]]:
+    return recent_records(db, batch_id=batch_id, limit=limit)
+
+
+@router.get("/top-stations")
+def top_stations_endpoint(
+    batch_id: Annotated[int | None, Query()] = None,
+    limit: int = Query(10, ge=1, le=100),
+    db: Session = Depends(get_db),
+) -> list[dict[str, object]]:
+    return top_stations(db, batch_id=batch_id, limit=limit)
+
+
+@router.get("/problem-shifts")
+def problem_shifts_endpoint(
+    batch_id: Annotated[int | None, Query()] = None,
+    limit: int = Query(20, ge=1, le=100),
+    db: Session = Depends(get_db),
+) -> list[dict[str, object]]:
+    return problem_shifts(db, batch_id=batch_id, limit=limit)
 
 
 @router.get("/filter-options")

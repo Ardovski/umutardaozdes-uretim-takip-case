@@ -9,7 +9,6 @@ from typing import Any
 
 from app.features.records.schemas import RecordFilter
 
-
 _COLUMNS: tuple[str, ...] = (
     "record_id",
     "Tarih",

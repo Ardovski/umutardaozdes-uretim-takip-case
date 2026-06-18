@@ -2,13 +2,11 @@
 from __future__ import annotations
 
 from collections import Counter
-from typing import Any, Sequence
+from typing import Any
 
 from app.core.config import settings
 from app.features.validation.models import (
     Issue,
-    IssueCategory,
-    IssueSeverity,
     ValidationResult,
 )
 

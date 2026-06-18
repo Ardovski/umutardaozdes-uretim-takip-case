@@ -10,12 +10,13 @@ os.environ["DATABASE_URL"] = "sqlite:///:memory:"
 os.environ["APP_ENV"] = "test"
 os.environ["LOG_LEVEL"] = "WARNING"
 
-import pytest
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+import contextlib
 
+import pytest
 from app.db import models  # noqa: F401  — Base.metadata'ya kayıt
 from app.db.base import Base
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
 
 @pytest.fixture(scope="session")
@@ -30,10 +31,8 @@ def test_engine():
     Base.metadata.create_all(bind=eng)
     yield eng
     eng.dispose()
-    try:
+    with contextlib.suppress(FileNotFoundError):
         os.unlink(path)
-    except FileNotFoundError:
-        pass
 
 
 @pytest.fixture
@@ -61,10 +60,9 @@ def _clean_tables(test_engine, TestSessionLocal):
 
 @pytest.fixture
 def client(test_engine, TestSessionLocal):
-    from fastapi.testclient import TestClient
-
     from app.db import session as session_module
     from app.main import app
+    from fastapi.testclient import TestClient
 
     session_module.engine = test_engine
     session_module.SessionLocal = TestSessionLocal

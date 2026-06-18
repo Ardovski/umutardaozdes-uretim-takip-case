@@ -5,7 +5,6 @@ import httpx
 
 from app.core.config import settings
 
-
 _RETRYABLE_STATUSES: frozenset[int] = frozenset({429, 500, 502, 503, 504})
 
 
@@ -18,9 +17,7 @@ def is_retryable_exception(exc: BaseException) -> bool:
         return True
     if isinstance(exc, httpx.ConnectError):
         return True
-    if isinstance(exc, httpx.RemoteProtocolError):
-        return True
-    return False
+    return bool(isinstance(exc, httpx.RemoteProtocolError))
 
 
 def should_retry(

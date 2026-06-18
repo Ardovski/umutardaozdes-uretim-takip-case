@@ -3,30 +3,28 @@ from __future__ import annotations
 
 import math
 from collections import Counter
-from typing import Any, Sequence
+from collections.abc import Sequence
+from typing import Any
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.db import models
-from app.features.ingestion.hashers import row_hash_from_mapping
 from app.features.validation.models import (
     Issue,
     IssueCategory,
     IssueSeverity,
-    RecordStatus,
     RuleContext,
     SuggestedAction,
     ValidationResult,
 )
 from app.features.validation.rules.consistency import CONSISTENCY_RULES
-from app.features.validation.rules.duplicate import DUPLICATE_RULES
 from app.features.validation.rules.domain import DOMAIN_RULES
+from app.features.validation.rules.duplicate import DUPLICATE_RULES
 from app.features.validation.rules.format_ import FORMAT_RULES
 from app.features.validation.rules.missing import MISSING_RULES
 from app.features.validation.rules.range_ import RANGE_RULES
-
 
 ALL_RULES: tuple[Any, ...] = (
     *MISSING_RULES,

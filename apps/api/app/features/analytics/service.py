@@ -5,13 +5,12 @@ import datetime as dt
 from collections.abc import Sequence
 from typing import Any
 
-from sqlalchemy import case, func, select
+from sqlalchemy import case, func, or_, select
 from sqlalchemy.orm import Session
 
 from app.db import models
-from app.features.records.schemas import DateRange, OeeRange, RecordFilter
+from app.features.records.schemas import DateRange, RecordFilter
 from app.features.records.service import _apply_filter, _build_issue_subquery
-
 
 # OEE = bileşenlerden yeniden hesaplanmış `oee_recomputed` (bkz. app.core.oee),
 # basit ortalama, TÜM kayıtlar üzerinden (hacim metrikleriyle aynı kapsam).
@@ -227,9 +226,7 @@ def quality_distribution(
     stmt = _apply_filter(stmt, flt, issue_subq=issue_subq)
     rows = db.execute(stmt).all()
     from app.features.analytics.schemas import QualityDistributionBucket
-    counts: dict[tuple[float, float, str], tuple[int, int]] = {
-        b: (0, 0) for b in _QUALITY_BUCKETS
-    }
+    counts: dict[tuple[float, float, str], tuple[int, int]] = dict.fromkeys(_QUALITY_BUCKETS, (0, 0))
     for r in rows:
         qv = float(r.q)
         for low, high, label in _QUALITY_BUCKETS:
@@ -250,3 +247,131 @@ def quality_distribution(
             )
         )
     return [o.model_dump() for o in out]
+
+
+def recent_records(
+    db: Session,
+    batch_id: int | None = None,
+    limit: int = 20,
+) -> list[dict[str, Any]]:
+    stmt = select(
+        models.ProductionRecord.id,
+        models.ProductionRecord.prod_date,
+        models.ProductionRecord.shift,
+        models.ProductionRecord.station_name,
+        models.ProductionRecord.stock_name,
+        models.ProductionRecord.oee,
+        models.ProductionRecord.produced_qty,
+        models.ProductionRecord.scrap_qty,
+        models.ProductionRecord.status,
+        models.ProductionRecord.created_at,
+    )
+    if batch_id is not None:
+        stmt = stmt.where(models.ProductionRecord.import_batch_id == batch_id)
+    stmt = stmt.order_by(
+        models.ProductionRecord.created_at.desc(),
+        models.ProductionRecord.id.desc(),
+    ).limit(limit)
+    rows = db.execute(stmt).all()
+    from app.features.analytics.schemas import RecentRecordOut
+    return [
+        RecentRecordOut(
+            id=int(r.id),
+            prod_date=r.prod_date,
+            shift=int(r.shift) if r.shift is not None else None,
+            station_name=r.station_name,
+            stock_name=r.stock_name,
+            oee=float(r.oee) if r.oee is not None else None,
+            produced_qty=int(r.produced_qty) if r.produced_qty is not None else None,
+            scrap_qty=int(r.scrap_qty) if r.scrap_qty is not None else None,
+            status=str(r.status),
+            created_at=r.created_at,
+        ).model_dump()
+        for r in rows
+    ]
+
+
+def top_stations(
+    db: Session,
+    batch_id: int | None = None,
+    limit: int = 10,
+) -> list[dict[str, Any]]:
+    stmt = (
+        select(
+            models.ProductionRecord.station_name.label("st"),
+            func.avg(models.ProductionRecord.oee_recomputed).label("avg_oee"),
+            func.coalesce(func.sum(models.ProductionRecord.produced_qty), 0).label("p"),
+            func.coalesce(func.sum(models.ProductionRecord.scrap_qty), 0).label("sc"),
+            func.count(models.ProductionRecord.id).label("cnt"),
+        )
+        .where(models.ProductionRecord.station_name.isnot(None))
+        .group_by(models.ProductionRecord.station_name)
+        .order_by(func.avg(models.ProductionRecord.oee_recomputed).desc())
+        .limit(limit)
+    )
+    if batch_id is not None:
+        stmt = stmt.where(models.ProductionRecord.import_batch_id == batch_id)
+    rows = db.execute(stmt).all()
+    from app.features.analytics.schemas import TopStationOut
+    return [
+        TopStationOut(
+            station_name=str(r.st),
+            avg_oee=float(r.avg_oee) if r.avg_oee is not None else None,
+            total_production=int(r.p or 0),
+            total_scrap=int(r.sc or 0),
+            record_count=int(r.cnt or 0),
+        ).model_dump()
+        for r in rows
+    ]
+
+
+def problem_shifts(
+    db: Session,
+    batch_id: int | None = None,
+    limit: int = 20,
+) -> list[dict[str, Any]]:
+    avg_oee_expr = func.avg(models.ProductionRecord.oee_recomputed)
+    rejected_count_expr = func.sum(
+        case((models.ProductionRecord.status == "rejected", 1), else_=0)
+    )
+    stmt = (
+        select(
+            models.ProductionRecord.prod_date.label("d"),
+            models.ProductionRecord.shift.label("s"),
+            models.ProductionRecord.station_name.label("st"),
+            avg_oee_expr.label("avg_oee"),
+            rejected_count_expr.label("rejected_count"),
+            func.coalesce(func.sum(models.ProductionRecord.produced_qty), 0).label("p"),
+            func.count(models.ProductionRecord.id).label("cnt"),
+        )
+        .where(models.ProductionRecord.shift.isnot(None))
+        .group_by(
+            models.ProductionRecord.prod_date,
+            models.ProductionRecord.shift,
+            models.ProductionRecord.station_name,
+        )
+        .having(
+            or_(
+                avg_oee_expr < 60,
+                rejected_count_expr > 0,
+            )
+        )
+        .order_by(avg_oee_expr.asc())
+        .limit(limit)
+    )
+    if batch_id is not None:
+        stmt = stmt.where(models.ProductionRecord.import_batch_id == batch_id)
+    rows = db.execute(stmt).all()
+    from app.features.analytics.schemas import ProblemShiftOut
+    return [
+        ProblemShiftOut(
+            prod_date=r.d,
+            shift=int(r.s),
+            station_name=r.st,
+            avg_oee=float(r.avg_oee) if r.avg_oee is not None else None,
+            rejected_count=int(r.rejected_count or 0),
+            total_production=int(r.p or 0),
+            record_count=int(r.cnt or 0),
+        ).model_dump()
+        for r in rows
+    ]

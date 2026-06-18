@@ -12,7 +12,6 @@ from app.db import models
 from app.db.base import Base
 from app.db.session import engine
 
-
 _EXTRA_INDEXES: tuple[Index, ...] = (
     Index("ix_record_oee", models.ProductionRecord.oee),
     Index("ix_record_stock_name", models.ProductionRecord.stock_name),

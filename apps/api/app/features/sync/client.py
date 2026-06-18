@@ -8,7 +8,6 @@ import httpx
 
 from app.core.config import settings
 
-
 _logger = logging.getLogger("sync.client")
 
 REDACTED: str = "***REDACTED***"

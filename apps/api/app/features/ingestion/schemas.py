@@ -2,30 +2,29 @@
 from __future__ import annotations
 
 import datetime as dt
-from typing import Optional
 
 from pydantic import BaseModel, Field
 
 
 class NormalizedRow(BaseModel):
-    record_id_src: Optional[int] = None
-    prod_date: Optional[dt.date] = None
-    work_order_no: Optional[str] = None
-    work_center_no: Optional[str] = None
-    work_center_name: Optional[str] = None
-    station_name: Optional[str] = None
-    stock_name: Optional[str] = None
-    shift: Optional[int] = None
-    availability: Optional[float] = None
-    performance: Optional[float] = None
-    quality: Optional[float] = None
-    oee: Optional[float] = None
-    run_time: Optional[float] = None
-    down_time: Optional[float] = None
-    planned_down: Optional[float] = None
-    unplanned_down: Optional[float] = None
-    produced_qty: Optional[int] = None
-    scrap_qty: Optional[int] = None
+    record_id_src: int | None = None
+    prod_date: dt.date | None = None
+    work_order_no: str | None = None
+    work_center_no: str | None = None
+    work_center_name: str | None = None
+    station_name: str | None = None
+    stock_name: str | None = None
+    shift: int | None = None
+    availability: float | None = None
+    performance: float | None = None
+    quality: float | None = None
+    oee: float | None = None
+    run_time: float | None = None
+    down_time: float | None = None
+    planned_down: float | None = None
+    unplanned_down: float | None = None
+    produced_qty: int | None = None
+    scrap_qty: int | None = None
     row_hash: str
     parse_warnings: list[str] = Field(default_factory=list)
 
@@ -51,3 +50,14 @@ class ImportSummary(BaseModel):
     failed_rows_sample: list[dict[str, str]]
     status: str
     elapsed_ms: int
+
+
+class BatchOut(BaseModel):
+    id: int
+    filename: str
+    file_hash: str
+    uploaded_at: dt.datetime
+    total_rows: int
+    imported_rows: int
+    status: str
+    is_active: bool

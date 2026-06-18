@@ -13,8 +13,6 @@ aşamaz). Detay: `.docs/shared/domain/`.
 """
 from __future__ import annotations
 
-from typing import Optional
-
 
 def _clamp(v: float, lo: float = 0.0, hi: float = 100.0) -> float:
     return max(lo, min(v, hi))
@@ -22,12 +20,12 @@ def _clamp(v: float, lo: float = 0.0, hi: float = 100.0) -> float:
 
 def recompute_oee(
     *,
-    run_time: Optional[float],
-    unplanned_down: Optional[float],
-    performance: Optional[float],
-    produced_qty: Optional[int],
-    scrap_qty: Optional[int],
-) -> Optional[float]:
+    run_time: float | None,
+    unplanned_down: float | None,
+    performance: float | None,
+    produced_qty: int | None,
+    scrap_qty: int | None,
+) -> float | None:
     """Ham bileşenlerden OEE (yüzde) döndürür.
 
     Kurallar:

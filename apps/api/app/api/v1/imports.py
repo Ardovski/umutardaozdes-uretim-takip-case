@@ -5,6 +5,5 @@ from fastapi import APIRouter
 
 from app.features.ingestion.api import router as ingestion_router
 
-
 router = APIRouter()
 router.include_router(ingestion_router, tags=["imports"])

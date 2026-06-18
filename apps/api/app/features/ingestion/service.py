@@ -4,10 +4,9 @@ from __future__ import annotations
 import io
 import time
 from collections.abc import Iterable
-from typing import Optional
 
 import pandas as pd
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
 from app.core.oee import recompute_oee
@@ -18,16 +17,16 @@ from app.features.ingestion.normalizer import (
     normalize_row,
     rescale_percent_columns,
 )
-from app.features.ingestion.schemas import ImportPreview, ImportSummary, NormalizedRow
-
+from app.features.ingestion.schemas import BatchOut, ImportPreview, ImportSummary, NormalizedRow
 
 _PREVIEW_LIMIT: int = 10
 _FAILED_SAMPLE_MAX: int = 5
+_ACTIVE_BATCH_KEY: str = "active_batch_id"
 
 
 def _read_dataframe(file_bytes: bytes) -> tuple[pd.DataFrame, str]:
     encodings: tuple[str, ...] = ("utf-8", "cp1254", "latin-1")
-    last_err: Optional[Exception] = None
+    last_err: Exception | None = None
     for enc in encodings:
         try:
             df = pd.read_csv(io.BytesIO(file_bytes), encoding=enc, dtype=str, keep_default_na=False)
@@ -44,6 +43,19 @@ def _read_dataframe(file_bytes: bytes) -> tuple[pd.DataFrame, str]:
 def _df_to_dicts(df: pd.DataFrame) -> Iterable[dict[str, object]]:
     for _, row in df.iterrows():
         yield {k: row.get(k) for k in df.columns}
+
+
+def _to_batch_out(batch: models.ImportBatch, *, is_active: bool) -> BatchOut:
+    return BatchOut(
+        id=batch.id,
+        filename=batch.filename,
+        file_hash=batch.file_hash,
+        uploaded_at=batch.uploaded_at,
+        total_rows=batch.total_rows,
+        imported_rows=batch.imported_rows,
+        status=batch.status,
+        is_active=is_active,
+    )
 
 
 def preview_csv(file_bytes: bytes, filename: str) -> ImportPreview:
@@ -187,3 +199,54 @@ def import_csv(db: Session, file_bytes: bytes, filename: str) -> ImportSummary:
         status=batch.status,
         elapsed_ms=elapsed_ms,
     )
+
+
+def list_batches(db: Session) -> list[BatchOut]:
+    active_id: int | None = get_active_batch_id(db)
+    rows = db.execute(
+        select(models.ImportBatch).order_by(models.ImportBatch.uploaded_at.desc())
+    ).scalars().all()
+    return [_to_batch_out(b, is_active=(b.id == active_id)) for b in rows]
+
+
+def get_active_batch_id(db: Session) -> int | None:
+    row: models.AppSetting | None = db.get(models.AppSetting, _ACTIVE_BATCH_KEY)
+    if row is None or row.value == "":
+        return None
+    try:
+        return int(row.value)
+    except (TypeError, ValueError):
+        return None
+
+
+def set_active_batch(db: Session, batch_id: int) -> BatchOut:
+    batch: models.ImportBatch | None = db.get(models.ImportBatch, batch_id)
+    if batch is None:
+        raise ValueError(f"Batch bulunamadı: {batch_id}")
+    setting: models.AppSetting | None = db.get(models.AppSetting, _ACTIVE_BATCH_KEY)
+    if setting is None:
+        setting = models.AppSetting(key=_ACTIVE_BATCH_KEY, value=str(batch_id))
+        db.add(setting)
+    else:
+        setting.value = str(batch_id)
+    db.flush()
+    return _to_batch_out(batch, is_active=True)
+
+
+def delete_batch(db: Session, batch_id: int) -> None:
+    existing: models.ImportBatch | None = db.get(models.ImportBatch, batch_id)
+    if existing is None:
+        raise ValueError(f"Batch bulunamadı: {batch_id}")
+    db.execute(
+        delete(models.ProductionRecord).where(
+            models.ProductionRecord.import_batch_id == batch_id
+        )
+    )
+    db.execute(
+        delete(models.ImportBatch).where(models.ImportBatch.id == batch_id)
+    )
+    if get_active_batch_id(db) == batch_id:
+        setting: models.AppSetting | None = db.get(models.AppSetting, _ACTIVE_BATCH_KEY)
+        if setting is not None:
+            db.delete(setting)
+    db.flush()

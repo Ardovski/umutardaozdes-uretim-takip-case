@@ -8,7 +8,6 @@ from typing import Any
 
 import httpx
 import pytest
-
 from app.core.config import settings
 from app.db import models
 from app.features.sync import client as sync_client

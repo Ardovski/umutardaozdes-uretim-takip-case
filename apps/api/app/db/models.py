@@ -1,4 +1,4 @@
-"""SQLAlchemy modelleri — 5 tablo.
+"""SQLAlchemy modelleri — 6 tablo.
 
 Şema dokümantasyonu (kaynak doğruluk): .docs/api/database.md
 İsimlendirme: tablo snake_case çoğul, kolon snake_case (bkz. .docs/shared/conventions/naming.md).
@@ -152,3 +152,15 @@ class SyncSubmission(Base):
     attempts: Mapped[int] = mapped_column(Integer, default=0)
     last_attempt_at: Mapped[dt.datetime | None] = mapped_column(DateTime)
     created_at: Mapped[dt.datetime] = mapped_column(DateTime, server_default=func.now())
+
+
+class AppSetting(Base):
+    """Anahtar-değer uygulama ayarları (key='active_batch_id' vb.)."""
+
+    __tablename__ = "app_settings"
+
+    key: Mapped[str] = mapped_column(String(64), primary_key=True)
+    value: Mapped[str] = mapped_column(Text)
+    updated_at: Mapped[dt.datetime] = mapped_column(
+        DateTime, server_default=func.now(), onupdate=func.now()
+    )

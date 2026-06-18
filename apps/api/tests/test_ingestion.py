@@ -5,7 +5,6 @@ import datetime as dt
 from pathlib import Path
 
 import pytest
-
 from app.features.ingestion import normalizer
 from app.features.ingestion.service import import_csv
 

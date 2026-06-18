@@ -1,9 +1,7 @@
 """Sync API router."""
 from __future__ import annotations
 
-import datetime as dt
-from collections.abc import Iterable
-from typing import Annotated, Optional
+from typing import Annotated
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
@@ -18,7 +16,6 @@ from app.features.sync.service import (
     retry_submission,
     submit,
 )
-
 
 router = APIRouter()
 
@@ -50,7 +47,7 @@ def submit_endpoint(
 
 @router.get("/history")
 def history_endpoint(
-    status: Annotated[Optional[str], Query()] = None,
+    status: Annotated[str | None, Query()] = None,
     limit: int = Query(100, ge=1, le=500),
     db: Session = Depends(get_db),
 ) -> list[dict[str, object]]:

@@ -7,8 +7,13 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 import { useActivateBatch, useImportCsv } from "./useBatch";
+import type { ImportSummary } from "./types";
 
-export function ImportDropzone() {
+export function ImportDropzone({
+  onImported,
+}: {
+  onImported?: (summary: ImportSummary) => void;
+}) {
   const [dragging, setDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const upload = useImportCsv();
@@ -25,6 +30,7 @@ export function ImportDropzone() {
     try {
       const result = await upload.mutateAsync(form);
       await activate.mutateAsync(result.batch_id);
+      onImported?.(result);
       toast.push({
         tone: "success",
         title: "İçe aktarıldı",

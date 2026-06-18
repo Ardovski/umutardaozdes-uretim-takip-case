@@ -38,6 +38,18 @@ class ImportPreview(BaseModel):
     encoding: str
 
 
+class ImportValidation(BaseModel):
+    """İçe aktarma sırasında otomatik çalışan validasyonun özeti (case §5.4)."""
+
+    validated_records: int
+    valid: int
+    suspect: int
+    rejected: int
+    total_issues: int
+    by_severity: dict[str, int]  # error|warning|info -> adet
+    by_category: dict[str, int]  # missing|range|consistency|duplicate|format|domain -> adet
+
+
 class ImportSummary(BaseModel):
     batch_id: int
     filename: str
@@ -50,6 +62,7 @@ class ImportSummary(BaseModel):
     failed_rows_sample: list[dict[str, str]]
     status: str
     elapsed_ms: int
+    validation: ImportValidation | None = None
 
 
 class BatchOut(BaseModel):

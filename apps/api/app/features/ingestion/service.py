@@ -17,7 +17,13 @@ from app.features.ingestion.normalizer import (
     normalize_row,
     rescale_percent_columns,
 )
-from app.features.ingestion.schemas import BatchOut, ImportPreview, ImportSummary, NormalizedRow
+from app.features.ingestion.schemas import (
+    BatchOut,
+    ImportPreview,
+    ImportSummary,
+    ImportValidation,
+    NormalizedRow,
+)
 
 _PREVIEW_LIMIT: int = 10
 _FAILED_SAMPLE_MAX: int = 5
@@ -123,6 +129,7 @@ def import_csv(db: Session, file_bytes: bytes, filename: str) -> ImportSummary:
     duplicate_row_skipped: int = 0
     failed_samples: list[dict[str, str]] = []
     parse_failed_normalized: dict[str, int] = {}
+    created_records: list[models.ProductionRecord] = []
 
     for r in rows_buffer:
         if "_parse_error" in r:
@@ -172,16 +179,22 @@ def import_csv(db: Session, file_bytes: bytes, filename: str) -> ImportSummary:
             status="pending",
         )
         db.add(record)
+        created_records.append(record)
         imported += 1
 
-    batch.imported_rows = imported
-    batch.rejected_rows = 0
-    batch.suspect_rows = 0
     if parse_failed > 0:
         parse_failed_normalized["parse_failed"] = parse_failed
     batch.status = "duplicate" if duplicate_file else "completed"
     if duplicate_file:
         batch.error_message = "Bu dosya daha önce import edilmiş (file_hash)."
+
+    db.flush()  # kayıtlar id alır → validasyon bunlara referans verebilir
+
+    # Case §5.4: CSV yüklendiğinde otomatik veri kalitesi kontrolü çalışır.
+    validation = _validate_imported(db, created_records, fhash)
+    batch.imported_rows = imported
+    batch.suspect_rows = validation.suspect if validation else 0
+    batch.rejected_rows = validation.rejected if validation else 0
 
     db.flush()
 
@@ -198,6 +211,41 @@ def import_csv(db: Session, file_bytes: bytes, filename: str) -> ImportSummary:
         failed_rows_sample=failed_samples,
         status=batch.status,
         elapsed_ms=elapsed_ms,
+        validation=validation,
+    )
+
+
+def _validate_imported(
+    db: Session,
+    records: list[models.ProductionRecord],
+    file_hash: str,
+) -> ImportValidation | None:
+    """İçe aktarılan kayıtlar için validasyonu çalıştırıp özet döndür.
+
+    `run_validation` kayıtların `status` alanını da set eder (valid/suspect/rejected),
+    böylece import sonrası dashboard/sync doğru durumu görür.
+    """
+    if not records:
+        return None
+    # Geç import: ingestion ↔ validation döngüsel bağımlılığını önlemek için fonksiyon içinde.
+    from app.features.validation.engine import run_validation, summarize
+
+    results = run_validation(
+        db,
+        record_ids=[r.id for r in records],
+        current_file_hash=file_hash,
+    )
+    s = summarize(results)
+    by_status = s["by_status"]
+    by_severity = s["by_severity"]
+    return ImportValidation(
+        validated_records=int(s["total_records"]),
+        valid=int(by_status.get("valid", 0)),
+        suspect=int(by_status.get("suspect", 0)),
+        rejected=int(by_status.get("rejected", 0)),
+        total_issues=sum(int(v) for v in by_severity.values()),
+        by_severity={k: int(v) for k, v in by_severity.items()},
+        by_category={k: int(v) for k, v in s["by_category"].items()},
     )
 
 

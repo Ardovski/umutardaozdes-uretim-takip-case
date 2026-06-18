@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { BatchSelector } from "./BatchSelector";
 import { ImportDropzone } from "./ImportDropzone";
+import { ImportSummaryPanel } from "./ImportSummaryPanel";
+import type { ImportSummary } from "./types";
 import { useActiveBatch, useActivateBatch } from "./useBatch";
 
 export function ImportPage() {
@@ -13,6 +15,7 @@ export function ImportPage() {
   const active = useActiveBatch();
   const activate = useActivateBatch();
   const hydratedRef = useRef(false);
+  const [summary, setSummary] = useState<ImportSummary | null>(null);
 
   useEffect(() => {
     if (hydratedRef.current) return;
@@ -43,7 +46,9 @@ export function ImportPage() {
         <BatchSelector />
       </header>
 
-      <ImportDropzone />
+      <ImportDropzone onImported={setSummary} />
+
+      {summary && <ImportSummaryPanel summary={summary} />}
     </main>
   );
 }

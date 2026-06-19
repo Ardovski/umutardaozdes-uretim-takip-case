@@ -30,11 +30,18 @@ function StationRankingChartInner() {
   const q = useStationRanking(10);
   const rows = (q.data ?? []).slice(0, 10);
 
+  // Veri sayısı CSV'ye göre değişir (ör. 5 istasyon) → başlığı dinamik tut,
+  // "Top 10" gibi sabit etiketler tutarsız görünmesin.
+  const chartTitle =
+    rows.length > 0
+      ? t("dashboard.stationRankingChart.titleWithCount", { n: rows.length })
+      : t("dashboard.stationRankingChart.title");
+
   return (
     <Card className="transition-shadow hover:shadow-md">
       <CardHeader>
         <CardTitle className="text-sm font-medium text-muted-foreground">
-          {t("dashboard.stationRankingChart.title")}
+          {chartTitle}
         </CardTitle>
       </CardHeader>
       <CardContent>

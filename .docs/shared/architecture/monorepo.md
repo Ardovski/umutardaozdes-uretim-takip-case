@@ -11,7 +11,7 @@ feature-bazlı `src/` / `app/features/`, gruplu `.docs/`.
 ## Tam Ağaç
 
 ```
-umut-arda-ozdes-uretim-takip-case/
+umutardaozdes-uretim-takip-case/
 ├── backend/                          # FastAPI backend (Python)
 │   ├── main.py                       # `uvicorn main:app` shim → app.main:app
 │   ├── app/

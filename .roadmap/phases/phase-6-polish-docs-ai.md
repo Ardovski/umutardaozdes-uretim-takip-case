@@ -25,7 +25,7 @@
 - [ ] Error handling cilası (backend tutarlı JSON, frontend toast/inline)
 - [ ] `.env.example` final; gerçek `.env` repo'da değil (kontrol)
 - [ ] `data/production_data.csv` repo'da
-- [ ] Repo adı `umut-arda-ozdes-uretim-takip-case`; push; e-posta `tunahan.ozturk@magna.com`
+- [ ] Repo adı `umutardaozdes-uretim-takip-case`; push; e-posta `tunahan.ozturk@magna.com`
 
 ### Bonus (zaman kalırsa)
 - [ ] İndirilebilir validation report (Excel/PDF)

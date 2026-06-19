@@ -22,7 +22,7 @@ uygulaması. MES'ten gelen `.csv` üretim raporlarını:
 4. **Sadece temiz/onaylı** veriyi harici REST API'ye gönderir ← **2. kritik**
 
 İşe alım case study'si (MAGNA). Aday: **Umut Arda Özdeş**. Süre: **2 iş günü**. Teslim: GitHub repo
-`umut-arda-ozdes-uretim-takip-case` + e-posta `tunahan.ozturk@magna.com`.
+`umutardaozdes-uretim-takip-case` + e-posta `tunahan.ozturk@magna.com`.
 
 ## 2. Kritik Kurallar (asla ihlal etme)
 

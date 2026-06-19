@@ -105,14 +105,14 @@
   - [x] Projenin amacı (kısa)
   - [x] Hızlı kurulum (komut-komut)
   - [x] Hızlı çalıştırma
-  - [ ] Ekran görüntüleri (placeholder — case teslim sonrası `ai_usage/screenshots/`)
+  - [x] Ekran görüntüleri (`.docs/screenshots/` — Dashboard/Import/Validation/Sync + Records/Tanımlar)
   - [x] Tespit edilen hata tipleri + örnekler (43 kural 6 kategori tablosu)
   - [x] API entegrasyon akışı
   - [x] Kullanılan kütüphaneler + gerekçe
   - [x] Yapamadıklarım / vakit yetmeyenler (dürüst liste)
   - [x] Daha fazla zaman olsaydı ne geliştirirdim
 - [x] Mimari Kararlar tablosu (stack + kısa gerekçe)
-- [x] Repo adı: `umut-arda-ozdes-uretim-takip-case`
+- [x] Repo adı: `umutardaozdes-uretim-takip-case`
 - [x] Public/invite repo + GitHub push
 - [x] Teslim e-postası → `tunahan.ozturk@magna.com`
 - [x] Kurulum **3 komuttan az** doğrulandı (`make setup` + `make dev`)

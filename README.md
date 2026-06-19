@@ -35,6 +35,55 @@ ulaşmasını engellemektir.
 **Kapsam:** `data/production_data.csv` — **2.117 satır · 18 kolon · 21 gün** (5–25 Kasım 2025)
 gerçekçi MES verisi.
 
+## 🖼 Ekran Görüntüleri
+
+> Görsel dosyaları [`.docs/screenshots/`](.docs/screenshots/) altındadır.
+
+### Import (CSV önizleme)
+
+CSV önizleme — DB'ye yazmadan ilk 10 satır + encoding (`utf-8`) ve boyut bilgisi; "İçe Aktar"
+tüm satırları import edip otomatik doğrular:
+
+![Import — CSV önizleme, ilk 10 satır, içe aktar](.docs/screenshots/import.png)
+
+### Dashboard
+
+OEE trendi (21 gün) · vardiya karşılaştırma · istasyon sıralaması (Top 10) · kalite dağılımı:
+
+![Dashboard — OEE trendi, vardiya karşılaştırma, istasyon sıralaması, kalite dağılımı](.docs/screenshots/dashboard.png)
+
+Alt sekme — son kayıtlar (statü renkli: VALİD / SUSPECT / REJECTED):
+
+![Dashboard — son kayıtlar tablosu](.docs/screenshots/dashboard-records.jpg)
+
+### Validasyon Raporu
+
+Canlı `run_validation` çıktısı: toplam/geçerli/şüpheli/reddedildi sayaçları + kural-bazında
+(rule_id, severity, kategori, mesaj, önerilen aksiyon) issue listesi:
+
+![Validasyon — issue listesi, kategori/severity kırılımı, fix/reject aksiyonları](.docs/screenshots/validation.jpg)
+
+### Kayıtlar (filtre + export)
+
+Sunucu-taraflı filtre (tarih, vardiya, istasyon, stok, OEE min/max, statü, "sadece sorunlu")
++ sayfalama + CSV indir:
+
+![Records — zengin filtre paneli + üretim kayıtları tablosu](.docs/screenshots/records.jpg)
+
+### API Gönderim (Sync)
+
+Yalnız `valid` kayıtların (gün, vardiya) agrege önizlemesi, çoklu hedef seçimi, gönderim geçmişi
+(durum / HTTP kodu / deneme / retry). Aşağıdaki örnekte `TARGET_API_KEY` boş olduğu için hedef API
+**401** döndürmüş ve retry matrisi 401'i **kalıcı hata** sayıp tekrar denememiş:
+
+![Sync — gönderim önizleme + history/retry](.docs/screenshots/sync.png)
+
+### Tanımlar (veri sözlüğü)
+
+18 kolonluk veri sözlüğü + OEE formülü + hedef API alanları + proje terimleri (TR/EN):
+
+![Tanımlar — veri sözlüğü referansı](.docs/screenshots/definitions.jpg)
+
 ## 🔄 Nasıl Çalışır (Uçtan Uca Akış)
 
 ### Ağ topolojisi
@@ -212,8 +261,8 @@ planda** yapılır. Hedef API'ye `httpx` ile POST edilir; retry/backoff matrisi 
 ## ⚙ Hızlı Kurulum (3 komuttan az)
 
 ```bash
-git clone https://github.com/<kullanici>/umut-arda-ozdes-uretim-takip-case.git
-cd umut-arda-ozdes-uretim-takip-case
+git clone https://github.com/Ardovski/umutardaozdes-uretim-takip-case.git
+cd umutardaozdes-uretim-takip-case
 make setup            # .env kopyalar + backend venv + frontend npm kurar
 ```
 
@@ -516,7 +565,16 @@ yalnız frontend `tsc`'sini çalıştırır; mypy kurulu ama Makefile hedefine b
 - **Auth (kullanıcı girişi)** yok — tek-kişilik operatör aracı varsayımı (`edited_by` audit'i var, login UI'sı yok).
 - **DB şema migration** Alembic ile değil, yalnız `init_db.create_all` — şema evrimi için geçiş script'leri gerekli.
 - **CI/CD pipeline** (GitHub Actions vb.) repo düzeyinde yok — manuel `make check`.
-- **Prod deploy / konteynerleştirme** yok — case kapsamı gereği yalnız yerel çalıştırma hedeflendi.
+- **Docker / Compose ile çalıştırma** son teslimde yok — **bilinçli sadeleştirme**. Geliştirme
+  sırasında `docker compose` servisleri + ayrı bir **sistem izleme paneli** + bunları uçtan uca
+  bağlayan `Makefile` otomasyonu kurmuştum; isterleri gereksiz yere aşmamak ve değerlendiriciye
+  sade/anlaşılır bir kurulum sunmak için bunları kaldırıp tek `Makefile` + iki dev servisine
+  indirdim. (Çalıştırma pekâlâ `make` + Docker servisleri ile de paketlenebilirdi.)
+- **Mobil uyumlu native istemci** yok — tek kod tabanından multi-platform (web + mobil) bir
+  yapı mümkündü; case bir web uygulaması istediği için kapsam dışında bırakıldı.
+- **Frontend cilası** daha ileri gidebilirdi (ekstra mikro-etkileşim/animasyon). Bilinçli olarak
+  fabrika ortamına uygun **sade ve hızlı anlaşılır** bir arayüz tercih edildi; anlaşılırlık görsel
+  süslemeden önce geldi — eksik değil, kasıtlı bir tasarım kararı.
 - **100K+ satır performans** profili yapılmadı — senkron SQLAlchemy + tek seferlik import yeterli görüldü.
 
 ## 🌟 Daha Fazla Zaman Olsaydı
@@ -528,6 +586,9 @@ yalnız frontend `tsc`'sini çalıştırır; mypy kurulu ama Makefile hedefine b
 - **Delta import** (yalnızca yeni satırları ekle) — çoklu-CSV birleştirme zaten yapıldı, sıradaki adım delta.
 - **UI'dan kural eşiği düzenleme** (settings canlı reload).
 - **Auth / çok-kullanıcı** (audit `edited_by` zaten var, login UI'sı eksik) + i18n sözlüğünü tüm kenar metinlere genişlet (TR/EN temel akış hazır).
+- **Docker Compose + Makefile ile tek komut çalıştırma** (`make up` → api + web + opsiyonel izleme paneli konteynerleri) — altyapısı denenmişti, ürün sürümüne geri taşınabilir.
+- **Sistem izleme paneli** (servis sağlık/uptime, sync kuyruğu, hata oranı) — ayrı bir gözlem panosu olarak.
+- **Tek kod tabanından mobil uyumlu native istemci** (multi-platform) — saha/operatör için.
 - **Alembic migration + CI/CD + container deploy** ve **100K+ satır** performans testi (chunk + async).
 
 ## 🤖 AI Kullanımı
@@ -554,3 +615,9 @@ Bu proje AI desteğiyle geliştirilmiştir; tüm etkileşimler şeffaf biçimde
 ---
 
 _Teslim: `tunahan.ozturk@magna.com`_
+
+
+Geliştirici: Umut Arda Özdeş
+
+Github: github.com/Ardovski
+Web: umutardaozdes.com.tr

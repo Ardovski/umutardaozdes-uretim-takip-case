@@ -7,8 +7,8 @@
 
 ## Kurulum (3 komuttan az)
 ```bash
-git clone https://github.com/<kullanici>/umut-arda-ozdes-uretim-takip-case.git
-cd umut-arda-ozdes-uretim-takip-case
+git clone https://github.com/Ardovski/umutardaozdes-uretim-takip-case.git
+cd umutardaozdes-uretim-takip-case
 make setup     # .env kopyalar + api venv + web npm kurar
 ```
 `.env` içindeki `TARGET_API_KEY`'i gerçek key ile doldur (case'ten gelen).

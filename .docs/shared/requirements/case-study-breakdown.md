@@ -84,7 +84,7 @@ Gönderim **(gün, vardiya) bazında ayrı ayrı**. Sadece valide + onaylı kay�
  [`evaluation-criteria.md`](evaluation-criteria.md)
 
 ## 7. Teslimat
-- Public/invite GitHub repo: **`umut-arda-ozdes-uretim-takip-case`**
+- Public/invite GitHub repo: **`umutardaozdes-uretim-takip-case`**
 - E-posta: `tunahan.ozturk@magna.com`
 - **README.md zorunlu içerikler:** amaç, kurulum (komut-komut), çalıştırma, ekran görüntüleri
   (Dashboard/Import/Validation/API), tespit edilen hata tipleri+örnek, API akışı, kütüphaneler+gerekçe,

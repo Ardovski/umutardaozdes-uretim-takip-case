@@ -1,1 +1,1 @@
-export { DefinitionsPage } from "./DefinitionsPage";
+export { DefinitionsPage } from "./pages/DefinitionsPage";

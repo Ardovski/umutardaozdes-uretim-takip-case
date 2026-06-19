@@ -1,7 +1,7 @@
-export { ValidationPage } from "./ValidationPage";
-export { IssueList } from "./IssueList";
-export { IssueDetailDrawer } from "./IssueDetailDrawer";
-export { IssueDiffEditor } from "./IssueDiffEditor";
+export { ValidationPage } from "./pages/ValidationPage";
+export { IssueList } from "./components/IssueList";
+export { IssueDetailDrawer } from "./components/IssueDetailDrawer";
+export { IssueDiffEditor } from "./components/IssueDiffEditor";
 export {
   useIssues,
   useValidationSummary,
@@ -12,7 +12,7 @@ export {
   useAcceptRecord,
   useRunValidation,
   useExportReportXlsx,
-} from "./useValidation";
+} from "./hooks/useValidation";
 export type {
   ValidationIssue,
   ValidationSummary,

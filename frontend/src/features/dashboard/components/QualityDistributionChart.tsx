@@ -1,0 +1,79 @@
+"use client";
+
+import { memo } from "react";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/atoms";
+import { useT } from "@/lib/i18n";
+import { useQualityDistribution } from "../hooks/useDashboardData";
+
+function QualityDistributionChartInner() {
+  const t = useT();
+  const q = useQualityDistribution();
+  const data = q.data ?? [];
+
+  return (
+    <Card className="transition-shadow hover:shadow-md">
+      <CardHeader>
+        <CardTitle className="text-sm font-medium text-muted-foreground">
+          {t("dashboard.qualityDistributionChart.title")}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {q.isLoading ? (
+          <Skeleton className="h-72 w-full" />
+        ) : data.length === 0 ? (
+          <EmptyState title={t("common.noData")} className="h-72" />
+        ) : (
+          <ResponsiveContainer width="100%" height={288} debounce={50}>
+            <BarChart data={data} margin={{ top: 8, right: 16, bottom: 8, left: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <XAxis
+                dataKey="bucket_label"
+                stroke="hsl(var(--muted-foreground))"
+                fontSize={12}
+                tickLine={false}
+              />
+              <YAxis
+                stroke="hsl(var(--muted-foreground))"
+                fontSize={12}
+                tickLine={false}
+              />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "hsl(var(--card))",
+                  border: "1px solid hsl(var(--border))",
+                  color: "hsl(var(--card-foreground))",
+                  borderRadius: 6,
+                }}
+              />
+              <Bar
+                dataKey="record_count"
+                name={t("dashboard.qualityDistributionChart.recordCount")}
+                fill="hsl(var(--chart-3))"
+                radius={[4, 4, 0, 0]}
+              />
+              <Bar
+                dataKey="total_scrap"
+                name={t("dashboard.qualityDistributionChart.totalScrap")}
+                fill="hsl(var(--chart-4))"
+                radius={[4, 4, 0, 0]}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+export const QualityDistributionChart = memo(QualityDistributionChartInner);

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, HTTPException, Response, UploadFile, status
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
@@ -77,16 +77,25 @@ def activate_batch_endpoint(
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
-@router.delete("/batches/{batch_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/batches/{batch_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    response_class=Response,
+)
 def delete_batch_endpoint(
     batch_id: int,
     db: Session = Depends(get_db),
-) -> None:
-    """Batch'i ve ona bağlı tüm üretim kayıtlarını siler."""
+) -> Response:
+    """Batch'i ve ona bağlı tüm üretim kayıtlarını siler.
+
+    OpenAPI standardına göre 204 No Content yanıtında gövde ve Content-Type
+    başlığı olmamalı — frontend `await res.json()` patlamasın diye açıkça
+    boş `Response` döneriz.
+    """
     try:
         delete_batch(db, batch_id)
         db.commit()
     except ValueError as exc:
         db.rollback()
         raise HTTPException(status_code=404, detail=str(exc)) from exc
-    return None
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

@@ -28,8 +28,21 @@ async function apiFetch<T>(path: string, options: RequestOptions = {}): Promise<
     body: body === undefined ? undefined : isForm ? (body as FormData) : JSON.stringify(body),
   });
 
-  const isJson = res.headers.get("content-type")?.includes("application/json");
-  const data = isJson ? await res.json() : await res.text();
+  // 204 No Content veya başka boş gövde durumunda parse etme (204 + content-type:
+  // application/json + boş body = JSON parse SyntaxError → TanStack Query bunu
+  // error olarak işlerdi; halbuki sunucu başarı döndü).
+  const ct = res.headers.get("content-type") ?? "";
+  const isJson = ct.includes("application/json") && res.status !== 204;
+  let data: unknown = undefined;
+  if (isJson) {
+    try {
+      data = await res.json();
+    } catch {
+      data = undefined;
+    }
+  } else {
+    data = await res.text();
+  }
 
   if (!res.ok) {
     const err = (data as { error?: { code?: string; message?: string; detail?: unknown } })?.error;

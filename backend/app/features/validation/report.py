@@ -72,6 +72,77 @@ def record_payload(record_id: int, result: ValidationResult) -> dict[str, Any]:
     }
 
 
+def report_xlsx(results: dict[int, ValidationResult]) -> bytes:
+    """Validation sonuçlarını `.xlsx` olarak serileştir (3 sayfa: Özet, Issues, Sistemik-Tekil).
+
+    `openpyxl` lazy import edilir (yalnız export çağrısında yüklenir).
+    """
+    from io import BytesIO
+
+    from openpyxl import Workbook
+    from openpyxl.styles import Font
+
+    bold = Font(bold=True)
+
+    wb = Workbook()
+    # 1) Özet
+    ws = wb.active
+    ws.title = "Özet"
+    ws.append(["Metrik", "Değer"])
+    for cell in ws[1]:
+        cell.font = bold
+    status_c: Counter[str] = Counter(r.status.value for r in results.values())
+    ws.append(["Toplam kayıt", len(results)])
+    for k in ("valid", "suspect", "rejected"):
+        ws.append([f"status: {k}", status_c.get(k, 0)])
+    for k, v in sorted(category_breakdown(results).items()):
+        ws.append([f"category: {k}", v])
+    for k, v in sorted(severity_breakdown(results).items()):
+        ws.append([f"severity: {k}", v])
+    for k, v in sorted(rule_breakdown(results).items()):
+        ws.append([f"rule: {k}", v])
+
+    # 2) Issues (kayıt başına her issue bir satır)
+    ws2 = wb.create_sheet("Issues")
+    ws2.append(
+        [
+            "record_id", "rule_id", "category", "severity",
+            "fields", "message", "suggested_action", "record_status",
+        ]
+    )
+    for cell in ws2[1]:
+        cell.font = bold
+    for rid, res in results.items():
+        for issue in res.issues:
+            ws2.append(
+                [
+                    rid,
+                    issue.rule_id,
+                    issue.category.value,
+                    issue.severity.value,
+                    ", ".join(issue.fields),
+                    issue.message,
+                    issue.suggested_action.value,
+                    res.status.value,
+                ]
+            )
+
+    # 3) Sistemik vs tekil
+    ws3 = wb.create_sheet("Sistemik-Tekil")
+    ws3.append(["tip", "rule_id"])
+    for cell in ws3[1]:
+        cell.font = bold
+    sv = systemic_vs_unique(results)
+    for rid in sv["systemic"]:
+        ws3.append(["sistemik", rid])
+    for rid in sv["unique"]:
+        ws3.append(["tekil", rid])
+
+    buf = BytesIO()
+    wb.save(buf)
+    return buf.getvalue()
+
+
 def full_report(results: dict[int, ValidationResult]) -> dict[str, Any]:
     return {
         "summary": {

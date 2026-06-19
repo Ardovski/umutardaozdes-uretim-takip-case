@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { env } from "@/lib/env";
 import { queryKeys } from "@/lib/query-keys";
 import type { IssueFilter, RecordEdit, ValidationIssue, ValidationSummary } from "./types";
 
@@ -77,6 +78,25 @@ export function useAcceptRecord() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.validation.issues({}) });
       qc.invalidateQueries({ queryKey: queryKeys.validation.summary });
+    },
+  });
+}
+
+/** İndirilebilir Excel validation raporu (.xlsx) — blob indirme. */
+export function useExportReportXlsx() {
+  return useMutation({
+    mutationFn: async () => {
+      const res = await fetch(`${env.apiUrl}/api/v1/validation/report.xlsx`, { method: "GET" });
+      if (!res.ok) throw new Error(`export failed: ${res.status}`);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "validation_report.xlsx";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
     },
   });
 }

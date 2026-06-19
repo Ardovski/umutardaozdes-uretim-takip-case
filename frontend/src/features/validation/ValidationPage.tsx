@@ -9,7 +9,7 @@ import { useToast } from "@/components/ui/toast";
 import { useT } from "@/lib/i18n";
 import { IssueDetailDrawer } from "./IssueDetailDrawer";
 import { IssueList } from "./IssueList";
-import { useRunValidation, useValidationSummary } from "./useValidation";
+import { useExportReportXlsx, useRunValidation, useValidationSummary } from "./useValidation";
 import type { ValidationIssue } from "./types";
 
 export function ValidationPage() {
@@ -17,8 +17,16 @@ export function ValidationPage() {
   const [selected, setSelected] = useState<ValidationIssue | null>(null);
   const summary = useValidationSummary();
   const run = useRunValidation();
+  const exportXlsx = useExportReportXlsx();
   const toast = useToast();
   const t = useT();
+
+  const onExport = () => {
+    exportXlsx.mutate(undefined, {
+      onError: () =>
+        toast.push({ tone: "destructive", title: t("validation.validationPage.exportError") }),
+    });
+  };
 
   const recordStatus =
     tab === "suspect" ? "suspect" : tab === "rejected" ? "rejected" : undefined;
@@ -48,9 +56,16 @@ export function ValidationPage() {
           <p className="font-mono text-sm text-muted-foreground">MAGNA · {t("validation.validationPage.subtitle")}</p>
           <h1 className="mt-1 text-3xl font-bold tracking-tight">{t("validation.validationPage.title")}</h1>
         </div>
-        <Button onClick={onRun} disabled={run.isPending}>
-          {run.isPending ? t("validation.validationPage.running") : t("validation.validationPage.runAll")}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={onExport} disabled={exportXlsx.isPending}>
+            {exportXlsx.isPending
+              ? t("validation.validationPage.exporting")
+              : t("validation.validationPage.exportXlsx")}
+          </Button>
+          <Button onClick={onRun} disabled={run.isPending}>
+            {run.isPending ? t("validation.validationPage.running") : t("validation.validationPage.runAll")}
+          </Button>
+        </div>
       </header>
 
       <section className="grid grid-cols-2 gap-4 md:grid-cols-4">

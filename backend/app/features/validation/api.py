@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import json
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Response
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -15,7 +15,7 @@ from app.features.validation.models import (
     IssueCategory,
     IssueSeverity,
 )
-from app.features.validation.report import full_report
+from app.features.validation.report import full_report, report_xlsx
 
 router = APIRouter()
 
@@ -88,6 +88,24 @@ def report(db: Session = Depends(get_db)) -> dict[str, object]:
     results = run_validation(db)
     db.commit()
     return full_report(results)
+
+
+_XLSX_MEDIA = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+
+
+@router.get("/report.xlsx")
+def report_xlsx_endpoint(db: Session = Depends(get_db)) -> Response:
+    """İndirilebilir validation raporu (.xlsx) — Özet + Issues + Sistemik/Tekil sayfaları."""
+    results = run_validation(db)
+    db.commit()
+    return Response(
+        content=report_xlsx(results),
+        media_type=_XLSX_MEDIA,
+        headers={
+            "Content-Disposition": 'attachment; filename="validation_report.xlsx"',
+            "Cache-Control": "no-store",
+        },
+    )
 
 
 def _record_or_404(db: Session, record_id: int) -> models.ProductionRecord:

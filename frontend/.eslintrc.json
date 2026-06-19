@@ -63,6 +63,7 @@
   },
   "overrides": [
     { "files": ["src/lib/env.ts"], "rules": { "no-restricted-syntax": "off" } },
+    { "files": ["src/lib/logger.ts"], "rules": { "no-console": "off" } },
     {
       "files": ["src/app/**", "*.config.*", "next.config.mjs"],
       "rules": { "no-restricted-imports": "off" }

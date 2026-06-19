@@ -14,6 +14,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 _REPO_ROOT = Path(__file__).resolve().parents[3]
 # Repo kökündeki db/ klasörü — veritabanının evi.
 DB_DIR = _REPO_ROOT / "db"
+# Repo kökündeki logs/ klasörü — 3 seviye (info/warning/error) dosya log'larının evi.
+LOG_DIR = _REPO_ROOT / "logs" / "backend"
 
 
 class Settings(BaseSettings):

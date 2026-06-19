@@ -410,8 +410,28 @@ Hedefleme önceliği: `targets[]` doluysa **yalnız** o gruplar; değilse `produ
 `shift` verildiyse o tek grup; aksi halde **tüm** geçerli gruplar.
 **Yanıt** `SubmitResponse`:
 `{accepted: list[str], skipped_already_success: list[str], rejected_due_to_hash_conflict:
-list[str], submission_ids: list[int]}` — string listeler `idempotency_key` (ör. `'2025-11-05:1'`)
-tutar; `submission_ids` ayrı `list[int]`'tir.
+list[str], rejected_target_constraints: list[str], submission_ids: list[int]}` — string
+listeler `idempotency_key` (ör. `'2025-11-05:1'`) tutar; `submission_ids` ayrı `list[int]`'tir.
+
+**Hedef API constraint validation (defense in depth)** — `app/features/sync/target_constraints.py`:
+case §5.5'in kabul ettiği aralıkları gönderim öncesi doğrular; uyumsuz gruplar payload
+oluşturulmadan `rejected_target_constraints` listesine düşer (gönderilmez, retry edilmez).
+| Alan | Aralık | Kaynak |
+|------|--------|--------|
+| `oe_value` | 0.0–100.0 | case §5.5 (yüzde) |
+| `machine_count` | 1–1000 | case §5.5 |
+| `total_production_units` | 1–1.000.000 | case §5.5 |
+| `shift` | {1, 2, 3} | case §5.5 (Sabah/Öğle/Gece) |
+| `production_date` | ≤ bugün | case §5.5 ("gelecek tarih kabul edilmez") |
+
+Validasyon motorundan (V-*) bağımsız bir savunma katmanıdır — kayıt `status='valid'` olsa
+bile outlier/bozulma nedeniyle sınırları aşmış olabilir; bu katman o durumda hedefe
+gönderimi durdurur ve operatörü uyarır (UI banner + badge).
+
+**Hedef response yakalama** — başarılı (2xx) yanıttan `submission_id`, `candidate_name`,
+`message`, `submitted_at` alanları `sync_submissions` satırına yazılır
+(`target_candidate_name`, `target_message`, `target_submitted_at` kolonları). `submitted_at`
+parse edilemezse ham metin `target_message`'a eklenir (kaybolmasın).
 
 ## 🔍 Tespit Edilen Hata Tipleri
 
@@ -551,19 +571,22 @@ yalnız frontend `tsc`'sini çalıştırır; mypy kurulu ama Makefile hedefine b
 
 ## ⚠️ Yapamadıklarım / Vakit Yetmeyenler (dürüst)
 
-- **Circuit breaker** yok — ardışık 429/5xx'lerde otomatik duraklatma operatöre/retry'a bırakıldı.
-- **İndirilebilir validation report (Excel/PDF)** yok — sadece JSON API + UI tablo (`openpyxl`
-  bağımlılığı hazır ama export yazılmadı).
-- **Kural eşiklerini UI'dan düzenleme** yok — eşikler `.env` / `settings` üzerinden.
-- **Tam data-lineage view'ı** yok — `import_batch_id` ile kısmi iz var, ama CSV satırı →
-  production_record → sync_submission uçtan uca görselleştirmesi eksik.
+- **Kural eşiklerini UI'dan düzenleme** yok — eşikler `.env` / `settings` üzerinden. Operator
+  kural açma/kapama/parametre değiştirme yapamıyor; prod'a yansıması için restart gerekir.
+- **43 kuralın tamamı için pytest** — şu an 12 kural parametrik pozitif+negatif + 6 motor/batch
+  testi (toplam 50) var; tüm kataloğa genişletilmedi.
+- **Tam data-lineage görselleştirme** yok — `import_batch_id` ile kısmi iz var, ama CSV satırı →
+  production_record → sync_submission uçtan uca görsel bir grafiği yok.
 - **`validation_issues` tablosu kullanılmıyor** — issue'lar canlı `run_validation`'dan üretilir,
   tabloya yazılmaz. Sonuç olarak `records` özelliğindeki `issue_count` ve `has_issues` ("Sadece
   sorunlu") filtresi bu boş tabloyu okuduğu için **fiilen etkisizdir**; "sorunlu" ayrımı pratikte
   `validation_status` (suspect/rejected) üzerinden yapılmalı. (İleride: ya tabloyu doldur ya da
   bu filtreyi statü-tabanlı yap.)
+- **100K+ satır performans profili** yapılmadı — 2.117 satırla smoke test yapıldı, stress
+  benchmark'ı ayrı bir tur iş.
+- **DB şema migration** Alembic ile değil, yalnız `init_db.create_all` + idempotent
+  `ALTER TABLE ... ADD COLUMN` (eklemek için yeterli; rename/drop için Alembic gerekli).
 - **Auth (kullanıcı girişi)** yok — tek-kişilik operatör aracı varsayımı (`edited_by` audit'i var, login UI'sı yok).
-- **DB şema migration** Alembic ile değil, yalnız `init_db.create_all` — şema evrimi için geçiş script'leri gerekli.
 - **CI/CD pipeline** (GitHub Actions vb.) repo düzeyinde yok — manuel `make check`.
 - **Docker / Compose ile çalıştırma** son teslimde yok — **bilinçli sadeleştirme**. Geliştirme
   sırasında `docker compose` servisleri + ayrı bir **sistem izleme paneli** + bunları uçtan uca
@@ -575,15 +598,27 @@ yalnız frontend `tsc`'sini çalıştırır; mypy kurulu ama Makefile hedefine b
 - **Frontend cilası** daha ileri gidebilirdi (ekstra mikro-etkileşim/animasyon). Bilinçli olarak
   fabrika ortamına uygun **sade ve hızlı anlaşılır** bir arayüz tercih edildi; anlaşılırlık görsel
   süslemeden önce geldi — eksik değil, kasıtlı bir tasarım kararı.
-- **100K+ satır performans** profili yapılmadı — senkron SQLAlchemy + tek seferlik import yeterli görüldü.
+
+### 🐢 Dev mode yavaşlığı (makul bağlamda)
+
+`make dev` (Next.js `next dev`) ilk route ziyaretinde **her sayfa için 5-15 saniye derleme**
+yapar (HMR + on-demand compile). Sonraki geçişler hızlıdır, ama ilk kez gidilen bir sayfa
+yavaş açılır. **Backend API zaten hızlı** (analytics uçları 5-10ms ölçüldü); yavaşlık
+tamamen frontend dev-mode derlemesidir. Çözüm: **production build** ile çalıştır —
+`make prod` komutu build alır ve optimize sunucuyu başlatır; route geçişleri anlık olur
+(<500ms). Demo/sunum için `make prod`, geliştirme için `make dev`.
 
 ## 🌟 Daha Fazla Zaman Olsaydı
 
-- **43 kuralın tamamı için pozitif/negatif pytest** (şu an 12 kural parametrik + 2 motor testi var → tüm kataloğa genişlet).
-- **İndirilebilir Excel/PDF validation report** (`openpyxl` zaten requirements'ta).
-- **Circuit breaker** (son 60s'de ≥5 hata → otomatik duraklat).
+- **43 kuralın tamamı için pozitif/negatif pytest** (şu an 12 kural parametrik + motor/batch
+  testleri var → tüm kataloğa genişlet).
+- **Kural eşiklerini UI'dan düzenlenebilir yap** (Settings tablosu + admin sayfası) — şu an
+  `.env` / `settings` üzerinden; operator restart etmeden değiştiremiyor.
 - **Tam data-lineage görselleştirme** (record_id → batch_id → submission_id grafiği).
 - **Delta import** (yalnızca yeni satırları ekle) — çoklu-CSV birleştirme zaten yapıldı, sıradaki adım delta.
+- **100K+ satır stress benchmark** (import + analytics + sync toplam süre ölçümü).
+- **Alembic** ile düzgün şema evrimi (rename / drop / FK değişikliği için).
+- **CI/CD** (GitHub Actions: `make check` her push'ta).
 - **UI'dan kural eşiği düzenleme** (settings canlı reload).
 - **Auth / çok-kullanıcı** (audit `edited_by` zaten var, login UI'sı eksik) + i18n sözlüğünü tüm kenar metinlere genişlet (TR/EN temel akış hazır).
 - **Docker Compose + Makefile ile tek komut çalıştırma** (`make up` → api + web + opsiyonel izleme paneli konteynerleri) — altyapısı denenmişti, ürün sürümüne geri taşınabilir.

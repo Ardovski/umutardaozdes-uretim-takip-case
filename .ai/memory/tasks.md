@@ -2,6 +2,9 @@
 
 > Format: `YYYY-MM-DD · ne yapıldı · sonuç/not`. En yeni en üstte.
 
+- 2026-06-19 · Case §5.5 uyum iyileştirmesi: target_constraints modülü (oe_value/machine_count/total_units/shift/future_date savunma katmanı) + SyncSubmission modeline target_candidate_name/message/submitted_at kolonları + ALTER TABLE migration + service.py response capture + UI banner+badge · pytest 49 (10 yeni) / ruff ✓ / tsc ✓ / eslint ✓ · tamam
+- 2026-06-19 · Validation filtresi bug fix: `useValidation.useIssues` URL'e `record_status` eklemiyordu → Şüpheli/Reddedildi sekmesi tüm issue'ları gösteriyordu. Tek satır düzeltme + dead code temizliği · tamam
+- 2026-06-19 · Claude yarım bıraktığı iş: circuit breaker (Faz 5 bonus) + tüm backend'e docstring/inline comment polish + `make test` tam kalite kapısı · pytest 39 / ruff ✓ / tsc ✓ / eslint ✓ · tamam
 - 2026-06-17 · Faz 6 — validation + records UI polish (19 component, 9 shadcn primitive, Zustand filters store, URL query senkron, sidebar layout) + `npx tsc --noEmit` 0 hata + `npx eslint` 0 hata · tamam
 - 2026-06-17 · Faz 6 — README dolu içerik (43 kural 6 kategori tablosu, dürüst yapamadıklarım listesi, mimari kararlar) + CHECKLIST güncelleme (8/15 + bonus) + ai_usage envanter (7 satır) + 00_overall_summary · tamam
 - 2026-06-17 · Faz 5 — sync feature (aggregator, client, retry policy, service, 4 endpoint) + sync_submissions error_message kolonu + SyncPage/HistoryTable (auto-refresh 3s) · tamam

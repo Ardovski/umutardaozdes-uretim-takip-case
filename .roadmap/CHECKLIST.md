@@ -96,7 +96,10 @@
 - [x] *(Tercih)* Batch gönderim (tek POST tüm gruplar; UI multi-select)
 - [x] *(Tercih)* Hedef gönderim loglama (`sync_submissions`)
 - [x] *(Tercih)* Async/background gönderim (`BackgroundTasks` + 202 Accepted)
-- [ ] *(Bonus)* Circuit breaker (uzun süreli hata → otomatik duraklatma)
+- [x] *(Bonus)* Circuit breaker (uzun süreli hata → otomatik duraklatma) — `app/features/sync/circuit.py` (in-process), `execute_pending` çağrılarında `breaker.allow() / record_success() / record_failure()`. Eşik/cooldown `.env` (`SYNC_CIRCUIT_FAILURE_THRESHOLD` / `SYNC_CIRCUIT_COOLDOWN_SECONDS`). +1 birim test.
+- [x] `make test` → tam sistem testi (pytest + ruff check + tsc + eslint) — 4 aşamalı çıktı, hata varsa exit≠0
+- [x] *(Bonus)* Hedef API constraint validation (defense in depth) — `app/features/sync/target_constraints.py`: case §5.5 aralıkları (oe_value 0-100, machine_count 1-1000, total_units 1-1M, shift 1/2/3, gelecek tarih ❌) gönderim öncesi doğrulanır; uyumsuz gruplar `rejected_target_constraints`'a düşer (payload oluşturulmaz). Aggregator `target_valid`+`target_issues` döner; UI banner + satır badge'i gösterir. +6 birim test.
+- [x] *(Bonus)* Hedef API response capture — başarılı (2xx) yanıttan `submission_id` (zaten vardı), `candidate_name`, `message`, `submitted_at` DB'ye yazılır (`sync_submissions.target_*` kolonları). Additive migration (`ALTER TABLE ... ADD COLUMN`) mevcut DB uyumlu. `submitted_at` parse edilemezse ham metin `target_message`'a eklenir. UI HistoryTable "Hedef yanıt" kolonu +4 birim test.
 
 ## Faz 6 — Teslimat & Doküman
 - [x] `.env.example` final (TARGET_API_KEY placeholder; Tüm env değişkenleri belgeli)
@@ -167,7 +170,7 @@
 | Faz 2 | 14 / 16 (motor + 43 kural + otomatik validasyon ✅; tüm-kural pytest ~) |
 | Faz 3 | 9 / 9 ✅ (3 dashboard tablosu eklendi + düzeltildi) |
 | Faz 4 | 9 / 9 ✅ |
-| Faz 5 | 12 / 13 (circuit breaker ❌) |
+| Faz 5 | 13 / 13 ✅ (circuit breaker + target_constraints + response capture tamamlandı) |
 | Faz 6 | 13 / 15 (ekran görüntüleri + push sonrası kontrol) |
-| Bonus | 2 / 11 |
+| Bonus | 5 / 11 (circuit breaker + make test + target_constraints + response capture eklendi) |
 | Düzeltme Turu (2026-06-19) | 7 / 7 ✅ |

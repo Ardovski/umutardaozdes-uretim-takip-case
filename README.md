@@ -127,6 +127,7 @@ planda** yapılır. Hedef API'ye `httpx` ile POST edilir; retry/backoff matrisi 
 | **Feature izolasyonu** | `eslint-plugin-boundaries`: `app → app/feature/shared`, `feature → yalnız shared + aynı feature`, `shared → shared`. Cross-feature import ve `@/features/*/*` deep import **lint hatası**. |
 | **State ayrımı** | Server-state = **TanStack Query** (cache, `refetchInterval` ile sync geçmişi 3s'de bir canlı); UI-state = **Zustand** (`src/stores/filters.ts`, URL serileştirme ile paylaşılabilir filtre). |
 | **Token-tabanlı tema** | Yalnızca Tailwind semantic token'ları (`bg-card`, `text-oee-good`…). Hardcoded renk yasak → dark mode bedava. |
+| **Çok dilli (i18n)** | Hafif özel `LocaleProvider` (Context + `localStorage`) → **TR/EN** anahtar sözlüğü (`lib/i18n/messages.ts`). Header'daki `LanguageToggle` ile anlık geçiş; harici bağımlılık yok. |
 | **İki geçişli validasyon** | Row-pass (kayıt başına saf kurallar) + batch-pass (gruplama gerektiren V-D02 / V-X05). |
 | **Idempotency** | `idempotency_key` (unique) + `payload_hash` (SHA-256 canonical JSON). Aynı key + aynı hash → skip; farklı hash → `force` gerekir. |
 | **Retry matrisi** | Yalnız **429** (60s cooldown) + **5xx** (500/502/503/504) ve ağ/timeout istisnaları retry edilir; **401 / 422 / 413 kalıcı hata**. Exponential backoff (`base ** attempt`, base=2), max 3 deneme. |
@@ -157,7 +158,7 @@ planda** yapılır. Hedef API'ye `httpx` ile POST edilir; retry/backoff matrisi 
 ├── frontend/                      # Next.js 14 (App Router) + TypeScript
 │   └── src/
 │       ├── app/                   # route'lar
-│       ├── components/ lib/ hooks/ stores/ types/   # shared katman (env.ts, api/client.ts, filters.ts)
+│       ├── components/ lib/ hooks/ stores/ types/   # shared katman (env.ts, api/client.ts, filters.ts, lib/i18n TR/EN + layout/LanguageToggle)
 │       └── features/
 │           ├── import/            # ImportDropzone (drag&drop + multiple), ImportProgress, mergeSummaries
 │           ├── dashboard/         # KPI grid + 4 recharts grafik + 3 tablo (Tabs)
@@ -351,6 +352,7 @@ dışındadır**.
 | POST | `/submit` | **202 Accepted** — arka planda gönder; `targets[]` ile çoklu-grup hedefleme |
 | GET | `/history` | gönderim geçmişi (`status` filtresi, `limit`, id desc) |
 | POST | `/{submission_id}/retry` | senkron yeniden gönder (404 yoksa; success ise değişmez) |
+| POST | `/retry-all` | **202** — `failed`/`retrying` tüm gönderimleri arka planda yeniden dener → `{queued}` |
 
 **`/submit` gövdesi** `SubmitRequest`:
 `{production_date?, shift?, targets?: [{production_date, shift}], force=false}`.
@@ -510,7 +512,6 @@ yalnız frontend `tsc`'sini çalıştırır; mypy kurulu ama Makefile hedefine b
   sorunlu") filtresi bu boş tabloyu okuduğu için **fiilen etkisizdir**; "sorunlu" ayrımı pratikte
   `validation_status` (suspect/rejected) üzerinden yapılmalı. (İleride: ya tabloyu doldur ya da
   bu filtreyi statü-tabanlı yap.)
-- **Çoklu dil (i18n)** yok — UI tamamen Türkçe.
 - **Auth (kullanıcı girişi)** yok — tek-kişilik operatör aracı varsayımı (`edited_by` audit'i var, login UI'sı yok).
 - **DB şema migration** Alembic ile değil, yalnız `init_db.create_all` — şema evrimi için geçiş script'leri gerekli.
 - **CI/CD pipeline** (GitHub Actions vb.) repo düzeyinde yok — manuel `make check`.
@@ -525,7 +526,7 @@ yalnız frontend `tsc`'sini çalıştırır; mypy kurulu ama Makefile hedefine b
 - **Tam data-lineage görselleştirme** (record_id → batch_id → submission_id grafiği).
 - **Delta import** (yalnızca yeni satırları ekle) — çoklu-CSV birleştirme zaten yapıldı, sıradaki adım delta.
 - **UI'dan kural eşiği düzenleme** (settings canlı reload).
-- **Çoklu dil** (TR/EN) + **Auth / çok-kullanıcı** (audit zaten var).
+- **Auth / çok-kullanıcı** (audit `edited_by` zaten var, login UI'sı eksik) + i18n sözlüğünü tüm kenar metinlere genişlet (TR/EN temel akış hazır).
 - **Alembic migration + CI/CD + container deploy** ve **100K+ satır** performans testi (chunk + async).
 
 ## 🤖 AI Kullanımı

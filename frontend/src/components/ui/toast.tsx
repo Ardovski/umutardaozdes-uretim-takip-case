@@ -41,11 +41,21 @@ export function useToast(): ToastContextValue {
   return ctx;
 }
 
+// Açık/koyu temada da okunur: her zaman katı `bg-card` + ton-renkli kenarlık;
+// gövde `text-card-foreground`, başlık ton rengi. (Eski hata: `bg-*/10` (beyaz
+// temada ~beyaz) üzerine `text-*-foreground` (beyaz) → açık temada görünmezdi.)
 const toneClass: Record<NonNullable<Toast["tone"]>, string> = {
-  default: "border bg-card text-card-foreground",
-  success: "border-success/40 bg-success/10 text-success-foreground",
-  destructive: "border-destructive/40 bg-destructive/10 text-destructive-foreground",
-  warning: "border-warning/40 bg-warning/10 text-warning-foreground",
+  default: "border-border bg-card text-card-foreground",
+  success: "border-success bg-card text-card-foreground",
+  destructive: "border-destructive bg-card text-card-foreground",
+  warning: "border-warning bg-card text-card-foreground",
+};
+
+const titleToneClass: Record<NonNullable<Toast["tone"]>, string> = {
+  default: "text-foreground",
+  success: "text-success",
+  destructive: "text-destructive",
+  warning: "text-warning",
 };
 
 export function Toaster() {
@@ -53,19 +63,26 @@ export function Toaster() {
   if (!ctx) return null;
   return (
     <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
-      {ctx.toasts.map((t) => (
-        <div
-          key={t.id}
-          className={cn(
-            "min-w-[260px] max-w-sm rounded-md border p-3 shadow-md",
-            toneClass[t.tone ?? "default"],
-          )}
-          role="status"
-        >
-          {t.title ? <div className="text-sm font-medium">{t.title}</div> : null}
-          {t.description ? <div className="mt-0.5 text-xs opacity-90">{t.description}</div> : null}
-        </div>
-      ))}
+      {ctx.toasts.map((t) => {
+        const tone = t.tone ?? "default";
+        return (
+          <div
+            key={t.id}
+            className={cn(
+              "min-w-[260px] max-w-sm rounded-md border-l-4 border p-3 shadow-md",
+              toneClass[tone],
+            )}
+            role="status"
+          >
+            {t.title ? (
+              <div className={cn("text-sm font-semibold", titleToneClass[tone])}>{t.title}</div>
+            ) : null}
+            {t.description ? (
+              <div className="mt-0.5 text-xs text-muted-foreground">{t.description}</div>
+            ) : null}
+          </div>
+        );
+      })}
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
+import { useT } from "@/lib/i18n";
 import { BatchSelector } from "./BatchSelector";
 import { ImportDropzone } from "./ImportDropzone";
 import { ImportPreviewPanel } from "./ImportPreviewPanel";
@@ -22,6 +23,7 @@ export function ImportPage() {
   const active = useActiveBatch();
   const activate = useActivateBatch();
   const toast = useToast();
+  const t = useT();
   const hydratedRef = useRef(false);
 
   const previewMut = useImportPreview();
@@ -67,7 +69,7 @@ export function ImportPage() {
   async function handleFiles(selected: File[]) {
     const csvs = selected.filter((f) => f.name.toLowerCase().endsWith(".csv"));
     if (!csvs.length) {
-      toast.push({ tone: "warning", title: "Sadece CSV dosyaları desteklenir" });
+      toast.push({ tone: "warning", title: t("import.importPage.onlyCsvSupported") });
       return;
     }
     setFiles(csvs);
@@ -77,7 +79,7 @@ export function ImportPage() {
       setPreview(pv);
       setPhase("preview");
     } catch {
-      toast.push({ tone: "destructive", title: "Önizleme alınamadı" });
+      toast.push({ tone: "destructive", title: t("import.importPage.previewFailed") });
       reset();
     }
   }
@@ -95,7 +97,7 @@ export function ImportPage() {
         results.push(s);
       }
     } catch {
-      toast.push({ tone: "destructive", title: "İçe aktarma başarısız" });
+      toast.push({ tone: "destructive", title: t("import.importPage.importFailed") });
       reset();
       return;
     }
@@ -107,8 +109,11 @@ export function ImportPage() {
     setPhase("done");
     toast.push({
       tone: "success",
-      title: "İçe aktarıldı",
-      description: `${combined.imported_rows}/${combined.total_rows} satır`,
+      title: t("import.importPage.imported"),
+      description: t("import.importPage.importedRows", {
+        imported: combined.imported_rows,
+        total: combined.total_rows,
+      }),
     });
   }
 
@@ -117,7 +122,7 @@ export function ImportPage() {
       <header className="flex flex-col items-start gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="font-mono text-sm text-muted-foreground">MAGNA · Import</p>
-          <h1 className="mt-1 text-3xl font-bold tracking-tight">CSV Import</h1>
+          <h1 className="mt-1 text-3xl font-bold tracking-tight">{t("import.importPage.title")}</h1>
         </div>
         <BatchSelector />
       </header>
@@ -132,9 +137,10 @@ export function ImportPage() {
         <div className="space-y-3">
           {files.length > 1 && (
             <p className="rounded-md border bg-muted/40 px-3 py-2 text-sm">
-              <strong>{files.length} dosya</strong> seçildi — aşağıdaki önizleme ilk dosyaya
-              (<span className="font-mono">{files[0].name}</span>) aittir. Onaylarsan hepsi
-              sırayla içe aktarılıp birleştirilir (satır bazında duplicate elenir).
+              <strong>{t("import.importPage.multiFileCount", { n: files.length })}</strong>{" "}
+              {t("import.importPage.multiFileNoteBefore")}
+              (<span className="font-mono">{files[0].name}</span>)
+              {t("import.importPage.multiFileNoteAfter")}
             </p>
           )}
           <ImportPreviewPanel
@@ -151,7 +157,7 @@ export function ImportPage() {
         <div className="space-y-3">
           <ImportSummaryPanel summary={summary} />
           <Button variant="outline" size="sm" onClick={reset}>
-            Yeni içe aktarma
+            {t("import.importPage.newImport")}
           </Button>
         </div>
       )}

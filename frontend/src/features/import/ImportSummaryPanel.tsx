@@ -4,22 +4,8 @@ import { AlertTriangle, CheckCircle2, FileWarning } from "lucide-react";
 import { Badge, severityTone } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
 import type { ImportSummary } from "./types";
-
-const CATEGORY_LABELS: Record<string, string> = {
-  missing: "Eksik/Boş",
-  range: "Aralık Dışı",
-  consistency: "Tutarsızlık",
-  duplicate: "Duplicate",
-  format: "Format",
-  domain: "Domain",
-};
-
-const SEVERITY_LABELS: Record<string, string> = {
-  error: "Hata",
-  warning: "Uyarı",
-  info: "Bilgi",
-};
 
 function Stat({
   label,
@@ -45,6 +31,7 @@ function Stat({
 }
 
 export function ImportSummaryPanel({ summary }: { summary: ImportSummary }) {
+  const t = useT();
   const v = summary.validation;
   const rejectedTotal = summary.parse_failed_count + summary.duplicate_row_skipped;
 
@@ -52,13 +39,15 @@ export function ImportSummaryPanel({ summary }: { summary: ImportSummary }) {
     <Card data-testid="import-summary">
       <CardHeader className="flex flex-row items-start justify-between gap-2 space-y-0">
         <div>
-          <CardTitle className="text-base">İçe Aktarma Özeti</CardTitle>
+          <CardTitle className="text-base">{t("import.importSummaryPanel.title")}</CardTitle>
           <p className="mt-1 font-mono text-xs text-muted-foreground">
             {summary.filename} · {summary.elapsed_ms} ms
           </p>
         </div>
         <Badge tone={summary.status === "duplicate" ? "warning" : "success"}>
-          {summary.status === "duplicate" ? "Tekrar dosya" : "Tamamlandı"}
+          {summary.status === "duplicate"
+            ? t("import.importSummaryPanel.duplicateFileBadge")
+            : t("import.importSummaryPanel.completedBadge")}
         </Badge>
       </CardHeader>
 
@@ -67,23 +56,28 @@ export function ImportSummaryPanel({ summary }: { summary: ImportSummary }) {
           <div className="flex items-start gap-2 rounded-md border border-warning/40 bg-warning/10 p-3 text-sm">
             <FileWarning className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
             <span>
-              Bu dosya daha önce içe aktarılmış (aynı <code>file_hash</code>). Satırlar
-              duplicate kontrolüyle atlandı.
+              {t("import.importSummaryPanel.duplicateFileNoticePrefix")}{" "}
+              <code>file_hash</code>).{" "}
+              {t("import.importSummaryPanel.duplicateFileNoticeSuffix")}
             </span>
           </div>
         )}
 
         {/* İçe aktarma sayıları */}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <Stat label="Toplam satır" value={summary.total_rows} />
-          <Stat label="Başarıyla aktarılan" value={summary.imported_rows} tone="success" />
+          <Stat label={t("import.importSummaryPanel.totalRows")} value={summary.total_rows} />
           <Stat
-            label="Atlanan (duplicate satır)"
+            label={t("import.importSummaryPanel.importedRows")}
+            value={summary.imported_rows}
+            tone="success"
+          />
+          <Stat
+            label={t("import.importSummaryPanel.skippedDuplicateRows")}
             value={summary.duplicate_row_skipped}
             tone={summary.duplicate_row_skipped > 0 ? "warning" : "default"}
           />
           <Stat
-            label="Parse hatası"
+            label={t("import.importSummaryPanel.parseErrors")}
             value={summary.parse_failed_count}
             tone={summary.parse_failed_count > 0 ? "destructive" : "default"}
           />
@@ -92,42 +86,46 @@ export function ImportSummaryPanel({ summary }: { summary: ImportSummary }) {
         {/* Validasyon (kalite) dökümü */}
         {v ? (
           <div className="space-y-3">
-            <p className="text-sm font-medium">Veri kalitesi (otomatik validasyon)</p>
+            <p className="text-sm font-medium">{t("import.importSummaryPanel.dataQualityHeading")}</p>
             <div className="grid grid-cols-3 gap-3">
-              <Stat label="Geçerli" value={v.valid} tone="success" />
-              <Stat label="Şüpheli" value={v.suspect} tone="warning" />
-              <Stat label="Reddedilen" value={v.rejected} tone="destructive" />
+              <Stat label={t("status.valid")} value={v.valid} tone="success" />
+              <Stat label={t("status.suspect")} value={v.suspect} tone="warning" />
+              <Stat label={t("status.rejected")} value={v.rejected} tone="destructive" />
             </div>
 
             {v.total_issues > 0 ? (
               <>
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-xs text-muted-foreground">Önem:</span>
+                  <span className="text-xs text-muted-foreground">
+                    {t("import.importSummaryPanel.severityLabel")}
+                  </span>
                   {Object.entries(v.by_severity).map(([sev, count]) => (
                     <Badge key={sev} tone={severityTone(sev)}>
-                      {SEVERITY_LABELS[sev] ?? sev}: {count}
+                      {t(`severity.${sev}`)}: {count}
                     </Badge>
                   ))}
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-xs text-muted-foreground">Kategori:</span>
+                  <span className="text-xs text-muted-foreground">
+                    {t("import.importSummaryPanel.categoryLabel")}
+                  </span>
                   {Object.entries(v.by_category).map(([cat, count]) => (
                     <Badge key={cat} tone="outline">
-                      {CATEGORY_LABELS[cat] ?? cat}: {count}
+                      {t(`import.importSummaryPanel.category.${cat}`)}: {count}
                     </Badge>
                   ))}
                 </div>
               </>
             ) : (
               <p className="flex items-center gap-1.5 text-sm text-success">
-                <CheckCircle2 className="h-4 w-4" /> Kalite sorunu bulunamadı.
+                <CheckCircle2 className="h-4 w-4" /> {t("import.importSummaryPanel.noQualityIssues")}
               </p>
             )}
           </div>
         ) : (
           summary.imported_rows === 0 && (
             <p className="text-sm text-muted-foreground">
-              Yeni kayıt aktarılmadı — validasyon çalıştırılmadı.
+              {t("import.importSummaryPanel.noNewRecordsValidation")}
             </p>
           )
         )}
@@ -137,27 +135,33 @@ export function ImportSummaryPanel({ summary }: { summary: ImportSummary }) {
           <div className="space-y-2">
             <p className="flex items-center gap-1.5 text-sm font-medium">
               <AlertTriangle className="h-4 w-4 text-destructive" />
-              Reddedilen satır örnekleri (sebep)
+              {t("import.importSummaryPanel.rejectedRowSamplesHeading")}
             </p>
             <div className="overflow-hidden rounded-lg border">
               <table className="w-full text-left text-xs">
                 <thead className="bg-muted/50 text-muted-foreground">
                   <tr>
-                    <th className="px-3 py-2 font-medium">Sebep</th>
-                    <th className="px-3 py-2 font-medium">Satır (özet)</th>
+                    <th className="px-3 py-2 font-medium">
+                      {t("import.importSummaryPanel.reasonColumn")}
+                    </th>
+                    <th className="px-3 py-2 font-medium">
+                      {t("import.importSummaryPanel.rowSummaryColumn")}
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {summary.failed_rows_sample.map((f, i) => (
                     <tr key={i} className="border-t align-top">
-                      <td className="px-3 py-2 text-destructive">{f.reason ?? "parse hatası"}</td>
+                      <td className="px-3 py-2 text-destructive">
+                        {f.reason ?? t("import.importSummaryPanel.parseErrorFallback")}
+                      </td>
                       <td className="px-3 py-2 font-mono text-muted-foreground">
                         {f.row
                           ? Object.entries(f.row)
                               .slice(0, 4)
                               .map(([k, val]) => `${k}=${val}`)
                               .join(" · ")
-                          : "—"}
+                          : t("common.none")}
                       </td>
                     </tr>
                   ))}
@@ -170,8 +174,11 @@ export function ImportSummaryPanel({ summary }: { summary: ImportSummary }) {
         {/* Reddedilen toplamı not */}
         {rejectedTotal > 0 && (
           <p className="text-xs text-muted-foreground">
-            Toplam {rejectedTotal} satır içe aktarılmadı (
-            {summary.parse_failed_count} parse hatası, {summary.duplicate_row_skipped} duplicate).
+            {t("import.importSummaryPanel.rejectedTotalNote", {
+              total: rejectedTotal,
+              parseFailed: summary.parse_failed_count,
+              duplicate: summary.duplicate_row_skipped,
+            })}
           </p>
         )}
       </CardContent>

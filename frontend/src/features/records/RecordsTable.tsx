@@ -12,10 +12,9 @@ import {
 import { Badge, statusTone } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { oeeColorClass } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
 import { useRecords } from "./useRecords";
 import type { RecordOut } from "./types";
-
-const SHIFT_LABELS: Record<number, string> = { 1: "Sabah", 2: "Öğle", 3: "Gece" };
 
 export interface RecordsTableProps {
   page: number;
@@ -24,6 +23,7 @@ export interface RecordsTableProps {
 }
 
 export function RecordsTable({ page, size, onPageChange }: RecordsTableProps) {
+  const t = useT();
   const [sorting, setSorting] = useState<SortingState>([]);
   const sort = sorting[0] ? `${sorting[0].id}:${sorting[0].desc ? "desc" : "asc"}` : undefined;
   const records = useRecords(page, size, sort);
@@ -32,37 +32,37 @@ export function RecordsTable({ page, size, onPageChange }: RecordsTableProps) {
     () => [
       {
         accessorKey: "prod_date",
-        header: "Tarih",
+        header: t("records.recordsTable.colDate"),
         cell: (info) => <span className="font-mono text-xs">{info.getValue<string | null>() ?? "—"}</span>,
       },
       {
         accessorKey: "shift",
-        header: "Vardiya",
+        header: t("records.recordsTable.colShift"),
         cell: (info) => {
           const v = info.getValue<number | null>();
-          return v === null ? "—" : SHIFT_LABELS[v] ?? v;
+          return v === null ? "—" : t(`shift.${v}`);
         },
       },
       {
         accessorKey: "station_name",
-        header: "İstasyon",
+        header: t("records.recordsTable.colStation"),
         cell: (info) => info.getValue<string | null>() ?? "—",
       },
       {
         accessorKey: "work_order_no",
-        header: "İş Emri",
+        header: t("records.recordsTable.colWorkOrder"),
         cell: (info) => <span className="font-mono text-xs">{info.getValue<string | null>() ?? "—"}</span>,
       },
       {
         accessorKey: "produced_qty",
-        header: "Üretim",
+        header: t("records.recordsTable.colProduced"),
         cell: (info) => (
           <span className="tabular-nums">{info.getValue<number | null>() ?? 0}</span>
         ),
       },
       {
         accessorKey: "scrap_qty",
-        header: "Fire",
+        header: t("records.recordsTable.colScrap"),
         cell: (info) => (
           <span className="tabular-nums text-oee-low">{info.getValue<number | null>() ?? 0}</span>
         ),
@@ -79,22 +79,22 @@ export function RecordsTable({ page, size, onPageChange }: RecordsTableProps) {
       },
       {
         accessorKey: "validation_status",
-        header: "Durum",
+        header: t("records.recordsTable.colStatus"),
         cell: (info) => {
           const s = info.getValue<string>();
-          return <Badge tone={statusTone(s)}>{s}</Badge>;
+          return <Badge tone={statusTone(s)}>{t(`status.${s}`)}</Badge>;
         },
       },
       {
         accessorKey: "issue_count",
-        header: "Issue",
+        header: t("records.recordsTable.colIssue"),
         cell: (info) => {
           const n = info.getValue<number>();
           return n > 0 ? <Badge tone="destructive">{n}</Badge> : <span className="text-muted-foreground">0</span>;
         },
       },
     ],
-    [],
+    [t],
   );
 
   const table = useReactTable({
@@ -140,7 +140,7 @@ export function RecordsTable({ page, size, onPageChange }: RecordsTableProps) {
           ) : table.getRowModel().rows.length === 0 ? (
             <tr>
               <td colSpan={columns.length} className="p-4 text-center text-muted-foreground">
-                Filtreye uyan kayıt yok.
+                {t("records.recordsTable.emptyFiltered")}
               </td>
             </tr>
           ) : (
@@ -158,7 +158,8 @@ export function RecordsTable({ page, size, onPageChange }: RecordsTableProps) {
       </table>
       <div className="flex items-center justify-between border-t p-2 text-xs text-muted-foreground">
         <span>
-          Toplam: <strong className="text-foreground">{total}</strong> · Sayfa {page} / {totalPages}
+          {t("records.recordsTable.total")}: <strong className="text-foreground">{total}</strong> ·{" "}
+          {t("records.recordsTable.pageOf", { page, totalPages })}
         </span>
         <span className="flex gap-2">
           <button
@@ -167,7 +168,7 @@ export function RecordsTable({ page, size, onPageChange }: RecordsTableProps) {
             disabled={page <= 1}
             onClick={() => onPageChange(page - 1)}
           >
-            Önceki
+            {t("records.recordsTable.prev")}
           </button>
           <button
             type="button"
@@ -175,7 +176,7 @@ export function RecordsTable({ page, size, onPageChange }: RecordsTableProps) {
             disabled={page >= totalPages}
             onClick={() => onPageChange(page + 1)}
           >
-            Sonraki
+            {t("records.recordsTable.next")}
           </button>
         </span>
       </div>

@@ -1,9 +1,8 @@
 "use client";
 
-import { useRetrySync, useSyncHistory } from "./useSync";
-import type { SubmissionOut } from "./types";
+import { useT } from "@/lib/i18n";
 
-const SHIFT_LABELS: Record<number, string> = { 1: "Sabah", 2: "Öğle", 3: "Gece" };
+import { useRetryAll, useRetrySync, useSyncHistory } from "./useSync";
 
 function fmtDate(s: string | null): string {
   if (!s) return "—";
@@ -24,25 +23,43 @@ function statusClass(status: string): string {
 }
 
 export function HistoryTable() {
+  const t = useT();
   const history = useSyncHistory();
   const retry = useRetrySync();
+  const retryAll = useRetryAll();
+  const rows = history.data ?? [];
+  // Yeniden denenebilir = başarısız + yeniden deniyor olan gönderimler.
+  const retriableCount = rows.filter((s) => s.status === "failed" || s.status === "retrying").length;
 
   return (
-    <section className="rounded-lg border bg-card text-card-foreground">
-      <div className="border-b p-3 text-sm font-medium text-muted-foreground">
-        Gönderim Geçmişi (auto-refresh 3s)
+    <section className="overflow-hidden rounded-lg border bg-card text-card-foreground">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b bg-muted/30 p-3">
+        <div>
+          <h2 className="text-sm font-semibold">{t("sync.historyTable.title")}</h2>
+          <p className="text-xs text-muted-foreground">{t("sync.historyTable.autoRefresh")}</p>
+        </div>
+        <button
+          type="button"
+          disabled={retriableCount === 0 || retryAll.isPending}
+          onClick={() => retryAll.mutate()}
+          className="rounded-md border bg-background px-3 py-1.5 text-xs font-medium text-foreground hover:bg-muted disabled:opacity-50"
+        >
+          {retryAll.isPending
+            ? t("sync.historyTable.retryingAll")
+            : t("sync.historyTable.retryAll", { n: retriableCount })}
+        </button>
       </div>
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b text-left text-muted-foreground">
+          <tr className="border-b bg-muted/40 text-left text-xs uppercase text-muted-foreground">
             <th className="p-2">#</th>
-            <th className="p-2">Tarih</th>
-            <th className="p-2">Vardiya</th>
-            <th className="p-2">Durum</th>
+            <th className="p-2">{t("sync.historyTable.colDate")}</th>
+            <th className="p-2">{t("sync.historyTable.colShift")}</th>
+            <th className="p-2">{t("sync.historyTable.colStatus")}</th>
             <th className="p-2 text-right">HTTP</th>
-            <th className="p-2 text-right">Deneme</th>
-            <th className="p-2">Son deneme</th>
-            <th className="p-2">Hedef ID</th>
+            <th className="p-2 text-right">{t("sync.historyTable.colAttempts")}</th>
+            <th className="p-2">{t("sync.historyTable.colLastAttempt")}</th>
+            <th className="p-2">{t("sync.historyTable.colTargetId")}</th>
             <th className="p-2"></th>
           </tr>
         </thead>
@@ -50,24 +67,24 @@ export function HistoryTable() {
           {history.isLoading ? (
             <tr>
               <td colSpan={9} className="p-4 text-center text-muted-foreground">
-                Yükleniyor…
+                {t("common.loading")}
               </td>
             </tr>
-          ) : (history.data ?? []).length === 0 ? (
+          ) : rows.length === 0 ? (
             <tr>
               <td colSpan={9} className="p-4 text-center text-muted-foreground">
-                Henüz gönderim yok.
+                {t("sync.historyTable.empty")}
               </td>
             </tr>
           ) : (
-            (history.data ?? []).map((s) => (
-              <tr key={s.id} className="border-b hover:bg-muted/50">
+            rows.map((s) => (
+              <tr key={s.id} className="border-b transition-colors hover:bg-muted/50">
                 <td className="p-2 font-mono">{s.id}</td>
                 <td className="p-2 font-mono">{s.prod_date}</td>
-                <td className="p-2">{SHIFT_LABELS[s.shift] ?? s.shift}</td>
+                <td className="p-2">{t(`shift.${s.shift}`)}</td>
                 <td className="p-2">
                   <span className={`rounded-md px-2 py-0.5 text-xs font-medium ${statusClass(s.status)}`}>
-                    {s.status}
+                    {t(`status.${s.status}`)}
                   </span>
                 </td>
                 <td className="p-2 text-right tabular-nums">{s.http_status ?? "—"}</td>
@@ -83,11 +100,11 @@ export function HistoryTable() {
                       return (
                         <button
                           type="button"
-                          className="rounded-md border bg-background px-2 py-1 text-xs text-foreground disabled:opacity-50"
+                          className="rounded-md border bg-background px-2 py-1 text-xs text-foreground hover:bg-muted disabled:opacity-50"
                           disabled={isThisRetrying}
                           onClick={() => retry.mutate(s.id)}
                         >
-                          {isThisRetrying ? "…" : "Retry"}
+                          {isThisRetrying ? "…" : t("common.retry")}
                         </button>
                       );
                     })()

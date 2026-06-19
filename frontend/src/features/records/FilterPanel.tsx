@@ -7,34 +7,28 @@ import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { useFilterOptions } from "./useRecords";
 import { useRecordsFilterStore } from "@/stores/filters";
+import { useT } from "@/lib/i18n";
 
-const SHIFTS: Array<{ value: number; label: string }> = [
-  { value: 1, label: "Sabah" },
-  { value: 2, label: "Öğle" },
-  { value: 3, label: "Gece" },
-];
+const SHIFT_VALUES = [1, 2, 3] as const;
 
-const STATUSES: Array<{ value: string; label: string }> = [
-  { value: "valid", label: "Geçerli" },
-  { value: "suspect", label: "Şüpheli" },
-  { value: "rejected", label: "Reddedildi" },
-];
+const STATUS_VALUES = ["valid", "suspect", "rejected"] as const;
 
 function toggle<T>(arr: T[], v: T): T[] {
   return arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v];
 }
 
 export function FilterPanel() {
+  const t = useT();
   const filter = useRecordsFilterStore();
   const options = useFilterOptions();
 
   return (
     <aside className="space-y-4 rounded-lg border bg-card p-4 text-card-foreground">
-      <h2 className="text-sm font-medium text-muted-foreground">Filtreler</h2>
+      <h2 className="text-sm font-medium text-muted-foreground">{t("records.filterPanel.title")}</h2>
 
       <div className="grid grid-cols-2 gap-2">
         <div>
-          <label className="block text-xs font-medium text-muted-foreground">Başlangıç</label>
+          <label className="block text-xs font-medium text-muted-foreground">{t("records.filterPanel.startDate")}</label>
           <Input
             type="date"
             value={filter.dateRange.start ?? ""}
@@ -42,7 +36,7 @@ export function FilterPanel() {
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-muted-foreground">Bitiş</label>
+          <label className="block text-xs font-medium text-muted-foreground">{t("records.filterPanel.endDate")}</label>
           <Input
             type="date"
             value={filter.dateRange.end ?? ""}
@@ -52,21 +46,21 @@ export function FilterPanel() {
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-muted-foreground">Vardiya</label>
+        <label className="block text-xs font-medium text-muted-foreground">{t("records.filterPanel.shift")}</label>
         <div className="mt-1 flex gap-2">
-          {SHIFTS.map((s) => (
+          {SHIFT_VALUES.map((value) => (
             <Checkbox
-              key={s.value}
-              checked={filter.shifts.includes(s.value)}
-              onChange={() => filter.setShifts(toggle(filter.shifts, s.value))}
-              label={s.label}
+              key={value}
+              checked={filter.shifts.includes(value)}
+              onChange={() => filter.setShifts(toggle(filter.shifts, value))}
+              label={t(`shift.${value}`)}
             />
           ))}
         </div>
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-muted-foreground">İstasyon</label>
+        <label className="block text-xs font-medium text-muted-foreground">{t("records.filterPanel.station")}</label>
         <Select
           multiple
           value={filter.stations}
@@ -84,7 +78,7 @@ export function FilterPanel() {
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-muted-foreground">Stok adı (LIKE)</label>
+        <label className="block text-xs font-medium text-muted-foreground">{t("records.filterPanel.stockName")}</label>
         <Input
           type="text"
           value={filter.stockName ?? ""}
@@ -94,7 +88,7 @@ export function FilterPanel() {
 
       <div>
         <label className="block text-xs font-medium text-muted-foreground">
-          OEE min: {filter.oeeRange.min ?? 0}
+          {t("records.filterPanel.oeeMin", { n: filter.oeeRange.min ?? 0 })}
         </label>
         <Slider
           value={filter.oeeRange.min ?? 0}
@@ -105,7 +99,7 @@ export function FilterPanel() {
       </div>
       <div>
         <label className="block text-xs font-medium text-muted-foreground">
-          OEE max: {filter.oeeRange.max ?? 100}
+          {t("records.filterPanel.oeeMax", { n: filter.oeeRange.max ?? 100 })}
         </label>
         <Slider
           value={filter.oeeRange.max ?? 100}
@@ -116,16 +110,16 @@ export function FilterPanel() {
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-muted-foreground">Validasyon durumu</label>
+        <label className="block text-xs font-medium text-muted-foreground">{t("records.filterPanel.validationStatus")}</label>
         <div className="mt-1 flex flex-wrap gap-2">
-          {STATUSES.map((s) => (
+          {STATUS_VALUES.map((value) => (
             <Checkbox
-              key={s.value}
-              checked={filter.validationStatus.includes(s.value)}
+              key={value}
+              checked={filter.validationStatus.includes(value)}
               onChange={() =>
-                filter.setValidationStatus(toggle(filter.validationStatus, s.value))
+                filter.setValidationStatus(toggle(filter.validationStatus, value))
               }
-              label={s.label}
+              label={t(`status.${value}`)}
             />
           ))}
         </div>
@@ -135,12 +129,12 @@ export function FilterPanel() {
         <Checkbox
           checked={filter.onlyProblematic}
           onChange={(v) => filter.setOnlyProblematic(v)}
-          label="Sadece sorunlu"
+          label={t("records.filterPanel.onlyProblematic")}
         />
       </div>
 
       <Button variant="outline" size="sm" onClick={() => filter.reset()}>
-        Sıfırla
+        {t("records.filterPanel.reset")}
       </Button>
     </aside>
   );

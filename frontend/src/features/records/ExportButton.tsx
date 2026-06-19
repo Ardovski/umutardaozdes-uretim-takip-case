@@ -2,11 +2,13 @@
 
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
+import { useT } from "@/lib/i18n";
 import { useExportCsv } from "./useRecords";
 
 export function ExportButton() {
   const exp = useExportCsv();
   const toast = useToast();
+  const t = useT();
   return (
     <Button
       variant="outline"
@@ -15,13 +17,21 @@ export function ExportButton() {
       onClick={() =>
         exp.mutate(undefined, {
           onSuccess: () =>
-            toast.push({ tone: "success", title: "CSV indirildi" }),
+            toast.push({
+              tone: "success",
+              title: t("records.exportButton.downloadSuccess"),
+            }),
           onError: () =>
-            toast.push({ tone: "destructive", title: "CSV indirilemedi" }),
+            toast.push({
+              tone: "destructive",
+              title: t("records.exportButton.downloadError"),
+            }),
         })
       }
     >
-      {exp.isPending ? "İndiriliyor…" : "CSV indir"}
+      {exp.isPending
+        ? t("records.exportButton.downloading")
+        : t("records.exportButton.download")}
     </Button>
   );
 }

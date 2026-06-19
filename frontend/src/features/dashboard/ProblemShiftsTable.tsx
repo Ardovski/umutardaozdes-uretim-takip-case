@@ -13,10 +13,9 @@ import { Inbox } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { oeeColorClass } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
 import { useProblemShifts } from "./useDashboardData";
 import type { ProblemShiftRow } from "./types";
-
-const SHIFT_LABELS: Record<number, string> = { 1: "Sabah", 2: "Öğle", 3: "Gece" };
 
 const fmtDate = (s: string | null): string => (s ? s : "—");
 const fmtNum = (n: number | null | undefined): string =>
@@ -27,6 +26,7 @@ export interface ProblemShiftsTableProps {
 }
 
 export function ProblemShiftsTable({ batchId }: ProblemShiftsTableProps) {
+  const t = useT();
   const q = useProblemShifts(batchId, 20);
   const [sorting, setSorting] = useState<SortingState>([]);
   const data = q.data ?? [];
@@ -35,22 +35,22 @@ export function ProblemShiftsTable({ batchId }: ProblemShiftsTableProps) {
     () => [
       {
         accessorKey: "prod_date",
-        header: "Tarih",
+        header: t("dashboard.problemShiftsTable.date"),
         cell: (info) => (
           <span className="font-mono text-xs">{fmtDate(info.getValue<string | null>())}</span>
         ),
       },
       {
         accessorKey: "shift",
-        header: "Vardiya",
+        header: t("dashboard.problemShiftsTable.shift"),
         cell: (info) => {
           const v = info.getValue<number>();
-          return SHIFT_LABELS[v] ?? `Vardiya ${v}`;
+          return t(`shift.${v}`);
         },
       },
       {
         accessorKey: "station_name",
-        header: "İstasyon",
+        header: t("dashboard.problemShiftsTable.station"),
         cell: (info) => info.getValue<string | null>() ?? "—",
       },
       {
@@ -67,7 +67,7 @@ export function ProblemShiftsTable({ batchId }: ProblemShiftsTableProps) {
       },
       {
         accessorKey: "rejected_count",
-        header: "Reddedilen",
+        header: t("dashboard.problemShiftsTable.rejected"),
         cell: (info) => {
           const v = info.getValue<number>();
           return v > 0 ? (
@@ -79,14 +79,14 @@ export function ProblemShiftsTable({ batchId }: ProblemShiftsTableProps) {
       },
       {
         accessorKey: "total_production",
-        header: "Üretim",
+        header: t("dashboard.problemShiftsTable.production"),
         cell: (info) => (
           <span className="tabular-nums">{fmtNum(info.getValue<number>())}</span>
         ),
       },
       {
         accessorKey: "record_count",
-        header: "Kayıt",
+        header: t("dashboard.problemShiftsTable.records"),
         cell: (info) => (
           <span className="tabular-nums text-muted-foreground">
             {fmtNum(info.getValue<number>())}
@@ -94,7 +94,7 @@ export function ProblemShiftsTable({ batchId }: ProblemShiftsTableProps) {
         ),
       },
     ],
-    [],
+    [t],
   );
 
   const table = useReactTable({
@@ -146,7 +146,7 @@ export function ProblemShiftsTable({ batchId }: ProblemShiftsTableProps) {
               <td colSpan={columns.length} className="p-8">
                 <div className="flex flex-col items-center gap-2 text-sm text-muted-foreground">
                   <Inbox className="h-8 w-8 opacity-60" />
-                  <p>Veri yok</p>
+                  <p>{t("common.noData")}</p>
                 </div>
               </td>
             </tr>

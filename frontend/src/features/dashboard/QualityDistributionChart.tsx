@@ -12,9 +12,11 @@ import {
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useT } from "@/lib/i18n";
 import { useQualityDistribution } from "./useDashboardData";
 
 export function QualityDistributionChart() {
+  const t = useT();
   const q = useQualityDistribution();
   const data = q.data ?? [];
 
@@ -22,7 +24,7 @@ export function QualityDistributionChart() {
     <Card className="transition-shadow hover:shadow-md">
       <CardHeader>
         <CardTitle className="text-sm font-medium text-muted-foreground">
-          Kalite Dağılımı (10 bucket)
+          {t("dashboard.qualityDistributionChart.title")}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -31,7 +33,7 @@ export function QualityDistributionChart() {
         ) : data.length === 0 ? (
           <div className="flex h-72 flex-col items-center justify-center gap-2 text-sm text-muted-foreground">
             <Inbox className="h-8 w-8 opacity-60" />
-            <p>Veri yok</p>
+            <p>{t("common.noData")}</p>
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={288}>
@@ -58,13 +60,13 @@ export function QualityDistributionChart() {
               />
               <Bar
                 dataKey="record_count"
-                name="Kayıt"
+                name={t("dashboard.qualityDistributionChart.recordCount")}
                 fill="hsl(var(--chart-3))"
                 radius={[4, 4, 0, 0]}
               />
               <Bar
                 dataKey="total_scrap"
-                name="Toplam Fire"
+                name={t("dashboard.qualityDistributionChart.totalScrap")}
                 fill="hsl(var(--chart-4))"
                 radius={[4, 4, 0, 0]}
               />

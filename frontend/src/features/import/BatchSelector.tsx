@@ -17,6 +17,7 @@ import {
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/components/ui/toast";
+import { useT } from "@/lib/i18n";
 import {
   useActiveBatch,
   useBatches,
@@ -32,6 +33,7 @@ export function BatchSelector() {
   const activate = useActivateBatch();
   const remove = useDeleteBatch();
   const toast = useToast();
+  const t = useT();
 
   const list = batches.data ?? [];
   const confirmTarget = list.find((b) => b.id === confirmDelete) ?? null;
@@ -41,13 +43,13 @@ export function BatchSelector() {
       onSuccess: (b) => {
         toast.push({
           tone: "success",
-          title: "Aktif batch güncellendi",
+          title: t("import.batchSelector.activateSuccess"),
           description: b.filename,
         });
         setOpen(false);
       },
       onError: () =>
-        toast.push({ tone: "destructive", title: "Aktif batch güncellenemedi" }),
+        toast.push({ tone: "destructive", title: t("import.batchSelector.activateError") }),
     });
   };
 
@@ -56,8 +58,8 @@ export function BatchSelector() {
     const name = confirmTarget.filename;
     remove.mutate(confirmTarget.id, {
       onSuccess: () =>
-        toast.push({ tone: "success", title: "Batch silindi", description: name }),
-      onError: () => toast.push({ tone: "destructive", title: "Batch silinemedi" }),
+        toast.push({ tone: "success", title: t("import.batchSelector.deleteSuccess"), description: name }),
+      onError: () => toast.push({ tone: "destructive", title: t("import.batchSelector.deleteError") }),
     });
   };
 
@@ -72,18 +74,18 @@ export function BatchSelector() {
                 <span className="truncate">{active.data.filename}</span>
               </>
             ) : (
-              <span className="text-muted-foreground">Batch seçin</span>
+              <span className="text-muted-foreground">{t("import.batchSelector.selectPlaceholder")}</span>
             )}
           </span>
           <ChevronDown className="h-4 w-4 shrink-0 opacity-60" />
         </PopoverTrigger>
         <PopoverContent align="end" className="w-[400px] p-0">
           <Command>
-            <CommandInput placeholder="Batch ara…" />
+            <CommandInput placeholder={t("import.batchSelector.searchPlaceholder")} />
             <CommandList>
               {list.length === 0 ? (
                 <div className="px-3 py-6 text-center text-sm text-muted-foreground">
-                  Henüz batch yok
+                  {t("import.batchSelector.empty")}
                 </div>
               ) : (
                 list.map((b) => (
@@ -100,12 +102,12 @@ export function BatchSelector() {
                           </span>
                           {b.is_active ? (
                             <Badge tone="success" className="shrink-0">
-                              Aktif
+                              {t("import.batchSelector.activeBadge")}
                             </Badge>
                           ) : null}
                         </div>
                         <span className="font-mono text-xs text-muted-foreground">
-                          {b.imported_rows}/{b.total_rows} satır · {b.status}
+                          {b.imported_rows}/{b.total_rows} {t("import.batchSelector.rows")} · {t(`status.${b.status}`)}
                         </span>
                       </div>
                       <Button
@@ -115,7 +117,7 @@ export function BatchSelector() {
                           e.stopPropagation();
                           setConfirmDelete(b.id);
                         }}
-                        aria-label="Sil"
+                        aria-label={t("import.batchSelector.deleteAria")}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -136,16 +138,15 @@ export function BatchSelector() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Batch silinsin mi?</AlertDialogTitle>
+            <AlertDialogTitle>{t("import.batchSelector.deleteTitle")}</AlertDialogTitle>
             <AlertDialogDescription>
-              <span className="font-mono">{confirmTarget?.filename ?? ""}</span> ve
-              tüm kayıtları (validasyon/düzeltme dahil) kalıcı olarak silinir. Bu
-              işlem geri alınamaz.
+              <span className="font-mono">{confirmTarget?.filename ?? ""}</span>{" "}
+              {t("import.batchSelector.deleteDescription")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>İptal</AlertDialogCancel>
-            <AlertDialogAction onClick={onConfirmDelete}>Sil</AlertDialogAction>
+            <AlertDialogCancel>{t("import.batchSelector.cancel")}</AlertDialogCancel>
+            <AlertDialogAction onClick={onConfirmDelete}>{t("import.batchSelector.confirmDelete")}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

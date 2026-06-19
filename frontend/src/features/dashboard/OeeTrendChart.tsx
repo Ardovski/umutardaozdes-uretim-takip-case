@@ -12,9 +12,11 @@ import {
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useT } from "@/lib/i18n";
 import { useOeeTrend } from "./useDashboardData";
 
 export function OeeTrendChart() {
+  const t = useT();
   const q = useOeeTrend(21);
   const data = q.data ?? [];
 
@@ -22,14 +24,14 @@ export function OeeTrendChart() {
     <Card className="transition-shadow hover:shadow-md">
       <CardHeader>
         <CardTitle className="text-sm font-medium text-muted-foreground">
-          OEE Trendi (21 gün)
+          {t("dashboard.oeeTrendChart.title")}
         </CardTitle>
       </CardHeader>
       <CardContent>
         {q.isLoading ? (
           <Skeleton className="h-72 w-full" />
         ) : data.length === 0 ? (
-          <EmptyChart label="Veri yok" />
+          <EmptyChart label={t("common.noData")} />
         ) : (
           <ResponsiveContainer width="100%" height={288}>
             <AreaChart data={data} margin={{ top: 8, right: 16, bottom: 8, left: 0 }}>

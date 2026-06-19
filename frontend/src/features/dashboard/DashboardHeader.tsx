@@ -2,9 +2,11 @@
 
 import { Activity } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useT } from "@/lib/i18n";
 import { useKpis } from "./useDashboardData";
 
 export function DashboardHeader() {
+  const t = useT();
   const kpis = useKpis();
   const recordCount = kpis.data?.record_count ?? 0;
   const valid = kpis.data?.valid_count ?? 0;
@@ -18,7 +20,7 @@ export function DashboardHeader() {
         <p className="font-mono text-xs">MAGNA · Dashboard</p>
       </div>
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-        <h1 className="text-3xl font-semibold tracking-tight">Üretim Performansı</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">{t("dashboard.dashboardHeader.title")}</h1>
         <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
           {kpis.isLoading ? (
             <Skeleton className="h-4 w-40" />
@@ -26,19 +28,19 @@ export function DashboardHeader() {
             <>
               <span>
                 <strong className="font-mono text-foreground">{recordCount.toLocaleString("tr-TR")}</strong>{" "}
-                kayıt
+                {t("dashboard.dashboardHeader.recordsLabel")}
               </span>
               <span className="flex items-center gap-1.5">
                 <span className="h-1.5 w-1.5 rounded-full bg-oee-good" />
-                <strong className="font-mono text-oee-good">{valid}</strong> geçerli
+                <strong className="font-mono text-oee-good">{valid}</strong> {t("dashboard.dashboardHeader.validLabel")}
               </span>
               <span className="flex items-center gap-1.5">
                 <span className="h-1.5 w-1.5 rounded-full bg-oee-mid" />
-                <strong className="font-mono text-oee-mid">{suspect}</strong> şüpheli
+                <strong className="font-mono text-oee-mid">{suspect}</strong> {t("dashboard.dashboardHeader.suspectLabel")}
               </span>
               <span className="flex items-center gap-1.5">
                 <span className="h-1.5 w-1.5 rounded-full bg-oee-low" />
-                <strong className="font-mono text-oee-low">{rejected}</strong> reddedildi
+                <strong className="font-mono text-oee-low">{rejected}</strong> {t("dashboard.dashboardHeader.rejectedLabel")}
               </span>
             </>
           )}

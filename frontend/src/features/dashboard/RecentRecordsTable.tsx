@@ -12,10 +12,9 @@ import {
 import { Inbox } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { oeeColorClass } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
 import { useRecentRecords } from "./useDashboardData";
 import type { RecentRecordRow } from "./types";
-
-const SHIFT_LABELS: Record<number, string> = { 1: "Sabah", 2: "Öğle", 3: "Gece" };
 
 const fmtDate = (s: string | null): string => (s ? s : "—");
 const fmtNum = (n: number | null | undefined): string =>
@@ -26,6 +25,7 @@ export interface RecentRecordsTableProps {
 }
 
 export function RecentRecordsTable({ batchId }: RecentRecordsTableProps) {
+  const t = useT();
   const q = useRecentRecords(batchId, 20);
   const [sorting, setSorting] = useState<SortingState>([]);
   const data = q.data ?? [];
@@ -34,27 +34,27 @@ export function RecentRecordsTable({ batchId }: RecentRecordsTableProps) {
     () => [
       {
         accessorKey: "prod_date",
-        header: "Tarih",
+        header: t("dashboard.recentRecordsTable.colDate"),
         cell: (info) => (
           <span className="font-mono text-xs">{fmtDate(info.getValue<string | null>())}</span>
         ),
       },
       {
         accessorKey: "shift",
-        header: "Vardiya",
+        header: t("dashboard.recentRecordsTable.colShift"),
         cell: (info) => {
           const v = info.getValue<number | null>();
-          return v === null ? "—" : (SHIFT_LABELS[v] ?? `Vardiya ${v}`);
+          return v === null ? "—" : t(`shift.${v}`);
         },
       },
       {
         accessorKey: "station_name",
-        header: "İstasyon",
+        header: t("dashboard.recentRecordsTable.colStation"),
         cell: (info) => info.getValue<string | null>() ?? "—",
       },
       {
         accessorKey: "stock_name",
-        header: "Stok",
+        header: t("dashboard.recentRecordsTable.colStock"),
         cell: (info) => (
           <span className="font-mono text-xs text-muted-foreground">
             {info.getValue<string | null>() ?? "—"}
@@ -75,14 +75,14 @@ export function RecentRecordsTable({ batchId }: RecentRecordsTableProps) {
       },
       {
         accessorKey: "produced_qty",
-        header: "Üretim",
+        header: t("dashboard.recentRecordsTable.colProduced"),
         cell: (info) => (
           <span className="tabular-nums">{fmtNum(info.getValue<number | null>())}</span>
         ),
       },
       {
         accessorKey: "scrap_qty",
-        header: "Fire",
+        header: t("dashboard.recentRecordsTable.colScrap"),
         cell: (info) => {
           const v = info.getValue<number | null>();
           return (
@@ -94,7 +94,7 @@ export function RecentRecordsTable({ batchId }: RecentRecordsTableProps) {
       },
       {
         accessorKey: "status",
-        header: "Durum",
+        header: t("dashboard.recentRecordsTable.colStatus"),
         cell: (info) => (
           <span className="text-xs uppercase text-muted-foreground">
             {info.getValue<string>()}
@@ -102,7 +102,7 @@ export function RecentRecordsTable({ batchId }: RecentRecordsTableProps) {
         ),
       },
     ],
-    [],
+    [t],
   );
 
   const table = useReactTable({
@@ -151,7 +151,7 @@ export function RecentRecordsTable({ batchId }: RecentRecordsTableProps) {
               <td colSpan={columns.length} className="p-8">
                 <div className="flex flex-col items-center gap-2 text-sm text-muted-foreground">
                   <Inbox className="h-8 w-8 opacity-60" />
-                  <p>Veri yok</p>
+                  <p>{t("common.noData")}</p>
                 </div>
               </td>
             </tr>

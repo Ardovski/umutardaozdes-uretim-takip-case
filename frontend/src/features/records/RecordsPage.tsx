@@ -7,8 +7,10 @@ import { FilterPanel } from "./FilterPanel";
 import { RecordsTable } from "./RecordsTable";
 import { useDebouncedFilter, useRecords } from "./useRecords";
 import { filterStateToQuery, queryToFilterState, useRecordsFilterStore } from "@/stores/filters";
+import { useT } from "@/lib/i18n";
 
 export function RecordsPage() {
+  const t = useT();
   const [page, setPage] = useState(1);
   const [size] = useState(50);
   const filter = useRecordsFilterStore();
@@ -51,8 +53,8 @@ export function RecordsPage() {
     <main className="container mx-auto space-y-4 py-8">
       <header className="flex items-end justify-between">
         <div>
-          <p className="font-mono text-sm text-muted-foreground">MAGNA · Kayıtlar</p>
-          <h1 className="mt-1 text-3xl font-bold tracking-tight">Üretim Kayıtları</h1>
+          <p className="font-mono text-sm text-muted-foreground">MAGNA · {t("records.recordsPage.breadcrumb")}</p>
+          <h1 className="mt-1 text-3xl font-bold tracking-tight">{t("records.recordsPage.title")}</h1>
         </div>
         <ExportButton />
       </header>

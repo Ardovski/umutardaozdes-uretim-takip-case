@@ -4,17 +4,18 @@ import { FileSpreadsheet, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useT } from "@/lib/i18n";
 import type { ImportPreview } from "./types";
 
-const COLS: Array<{ key: keyof PreviewCols; label: string }> = [
-  { key: "record_id_src", label: "record_id" },
-  { key: "prod_date", label: "Tarih" },
-  { key: "shift", label: "Vardiya" },
-  { key: "station_name", label: "İstasyon" },
-  { key: "stock_name", label: "Stok" },
-  { key: "oee", label: "OEE" },
-  { key: "produced_qty", label: "Üretilen" },
-  { key: "scrap_qty", label: "Hatalı" },
+const COLS: Array<{ key: keyof PreviewCols; labelKey: string | null; raw?: string }> = [
+  { key: "record_id_src", labelKey: null, raw: "record_id" },
+  { key: "prod_date", labelKey: "import.importPreviewPanel.colDate" },
+  { key: "shift", labelKey: "import.importPreviewPanel.colShift" },
+  { key: "station_name", labelKey: "import.importPreviewPanel.colStation" },
+  { key: "stock_name", labelKey: "import.importPreviewPanel.colStock" },
+  { key: "oee", labelKey: null, raw: "OEE" },
+  { key: "produced_qty", labelKey: "import.importPreviewPanel.colProduced" },
+  { key: "scrap_qty", labelKey: "import.importPreviewPanel.colScrap" },
 ];
 
 type PreviewCols = ImportPreview["sample"][number];
@@ -35,6 +36,7 @@ export function ImportPreviewPanel({
   onCancel: () => void;
   busy?: boolean;
 }) {
+  const t = useT();
   const shown = preview.sample.length;
   return (
     <Card data-testid="import-preview">
@@ -42,14 +44,18 @@ export function ImportPreviewPanel({
         <div>
           <CardTitle className="flex items-center gap-2 text-base">
             <FileSpreadsheet className="h-4 w-4 text-muted-foreground" />
-            Önizleme — {preview.filename}
+            {t("import.importPreviewPanel.title")} — {preview.filename}
           </CardTitle>
           <p className="mt-1 text-xs text-muted-foreground">
-            {preview.total_rows} satır · {preview.detected_columns.length} kolon ·{" "}
-            {preview.encoding} · ilk {shown} satır gösteriliyor
+            {t("import.importPreviewPanel.meta", {
+              rows: preview.total_rows,
+              cols: preview.detected_columns.length,
+              encoding: preview.encoding,
+              shown,
+            })}
           </p>
         </div>
-        <Badge tone="outline">içe aktarılmadı</Badge>
+        <Badge tone="outline">{t("import.importPreviewPanel.notImported")}</Badge>
       </CardHeader>
 
       <CardContent className="space-y-4">
@@ -59,7 +65,7 @@ export function ImportPreviewPanel({
               <tr>
                 {COLS.map((c) => (
                   <th key={c.key} className="whitespace-nowrap px-3 py-2 font-medium">
-                    {c.label}
+                    {c.labelKey ? t(c.labelKey) : c.raw}
                   </th>
                 ))}
               </tr>
@@ -79,17 +85,16 @@ export function ImportPreviewPanel({
         </div>
 
         <p className="text-xs text-muted-foreground">
-          Bu yalnız bir önizlemedir; veri henüz içe aktarılmadı. Onaylarsan tüm satırlar
-          import edilip otomatik doğrulanır.
+          {t("import.importPreviewPanel.hint")}
         </p>
 
         <div className="flex justify-end gap-2">
           <Button variant="outline" size="sm" onClick={onCancel} disabled={busy}>
-            Vazgeç
+            {t("import.importPreviewPanel.cancel")}
           </Button>
           <Button size="sm" onClick={onConfirm} disabled={busy}>
             {busy && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />}
-            İçe Aktar ({preview.total_rows} satır)
+            {t("import.importPreviewPanel.confirm", { rows: preview.total_rows })}
           </Button>
         </div>
       </CardContent>

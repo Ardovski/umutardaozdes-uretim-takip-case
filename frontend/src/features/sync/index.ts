@@ -1,6 +1,6 @@
 export { SyncPage } from "./SyncPage";
 export { HistoryTable } from "./HistoryTable";
-export { useSyncHistory, useSyncPreview, useSubmitSync, useRetrySync } from "./useSync";
+export { useSyncHistory, useSyncPreview, useSubmitSync, useRetrySync, useRetryAll } from "./useSync";
 export type {
   SubmissionOut,
   SubmitRequest,

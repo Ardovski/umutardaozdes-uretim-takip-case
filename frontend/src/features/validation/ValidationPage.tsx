@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/toast";
+import { useT } from "@/lib/i18n";
 import { IssueDetailDrawer } from "./IssueDetailDrawer";
 import { IssueList } from "./IssueList";
 import { useRunValidation, useValidationSummary } from "./useValidation";
@@ -17,6 +18,7 @@ export function ValidationPage() {
   const summary = useValidationSummary();
   const run = useRunValidation();
   const toast = useToast();
+  const t = useT();
 
   const recordStatus =
     tab === "suspect" ? "suspect" : tab === "rejected" ? "rejected" : undefined;
@@ -26,11 +28,16 @@ export function ValidationPage() {
       onSuccess: (d) =>
         toast.push({
           tone: "success",
-          title: "Validasyon çalıştırıldı",
-          description: `${d.record_count} kayıt değerlendirildi.`,
+          title: t("validation.validationPage.runSuccessTitle"),
+          description: t("validation.validationPage.runSuccessDescription", {
+            n: d.record_count,
+          }),
         }),
       onError: () =>
-        toast.push({ tone: "destructive", title: "Validasyon başarısız" }),
+        toast.push({
+          tone: "destructive",
+          title: t("validation.validationPage.runErrorTitle"),
+        }),
     });
   };
 
@@ -38,35 +45,35 @@ export function ValidationPage() {
     <main className="container mx-auto space-y-4 py-8">
       <header className="flex items-end justify-between">
         <div>
-          <p className="font-mono text-sm text-muted-foreground">MAGNA · Validasyon</p>
-          <h1 className="mt-1 text-3xl font-bold tracking-tight">Validation Issues</h1>
+          <p className="font-mono text-sm text-muted-foreground">MAGNA · {t("validation.validationPage.subtitle")}</p>
+          <h1 className="mt-1 text-3xl font-bold tracking-tight">{t("validation.validationPage.title")}</h1>
         </div>
         <Button onClick={onRun} disabled={run.isPending}>
-          {run.isPending ? "Çalışıyor…" : "Tüm kayıtları doğrula"}
+          {run.isPending ? t("validation.validationPage.running") : t("validation.validationPage.runAll")}
         </Button>
       </header>
 
       <section className="grid grid-cols-2 gap-4 md:grid-cols-4">
         <SummaryCard
-          label="Toplam"
+          label={t("validation.validationPage.summaryTotal")}
           value={summary.data?.total_records ?? null}
           tone="default"
           loading={summary.isLoading}
         />
         <SummaryCard
-          label="Valid"
+          label={t("status.valid")}
           value={summary.data?.by_status?.valid ?? null}
           tone="success"
           loading={summary.isLoading}
         />
         <SummaryCard
-          label="Suspect"
+          label={t("status.suspect")}
           value={summary.data?.by_status?.suspect ?? null}
           tone="warning"
           loading={summary.isLoading}
         />
         <SummaryCard
-          label="Rejected"
+          label={t("status.rejected")}
           value={summary.data?.by_status?.rejected ?? null}
           tone="destructive"
           loading={summary.isLoading}
@@ -75,9 +82,9 @@ export function ValidationPage() {
 
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList>
-          <TabsTrigger value="all">Tümü</TabsTrigger>
-          <TabsTrigger value="suspect">Şüpheli</TabsTrigger>
-          <TabsTrigger value="rejected">Reddedildi</TabsTrigger>
+          <TabsTrigger value="all">{t("common.all")}</TabsTrigger>
+          <TabsTrigger value="suspect">{t("status.suspect")}</TabsTrigger>
+          <TabsTrigger value="rejected">{t("status.rejected")}</TabsTrigger>
         </TabsList>
         <TabsContent value="all">
           <IssueList onSelect={setSelected} />

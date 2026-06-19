@@ -11,10 +11,10 @@ import {
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useT } from "@/lib/i18n";
 import { useShiftComparison } from "./useDashboardData";
 import type { ShiftComparisonRow } from "./types";
 
-const SHIFT_LABELS: Record<number, string> = { 1: "Sabah", 2: "Öğle", 3: "Gece" };
 const SHIFT_COLORS: string[] = [
   "hsl(var(--chart-1))",
   "hsl(var(--chart-2))",
@@ -22,6 +22,7 @@ const SHIFT_COLORS: string[] = [
 ];
 
 export function ShiftComparisonChart() {
+  const t = useT();
   const q = useShiftComparison();
   const data: ShiftComparisonRow[] = q.data ?? [];
 
@@ -29,7 +30,7 @@ export function ShiftComparisonChart() {
     <Card className="transition-shadow hover:shadow-md">
       <CardHeader>
         <CardTitle className="text-sm font-medium text-muted-foreground">
-          Vardiya Karşılaştırma
+          {t("dashboard.shiftComparisonChart.title")}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -38,7 +39,7 @@ export function ShiftComparisonChart() {
         ) : data.length === 0 ? (
           <div className="flex h-72 flex-col items-center justify-center gap-2 text-sm text-muted-foreground">
             <Inbox className="h-8 w-8 opacity-60" />
-            <p>Veri yok</p>
+            <p>{t("common.noData")}</p>
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={288}>
@@ -46,7 +47,7 @@ export function ShiftComparisonChart() {
               innerRadius="20%"
               outerRadius="100%"
               data={data.map((r, i) => ({
-                name: SHIFT_LABELS[r.shift] ?? `Vardiya ${r.shift}`,
+                name: t(`shift.${r.shift}`),
                 shift: r.shift,
                 avg_oee: r.avg_oee ?? 0,
                 fill: SHIFT_COLORS[i % SHIFT_COLORS.length],

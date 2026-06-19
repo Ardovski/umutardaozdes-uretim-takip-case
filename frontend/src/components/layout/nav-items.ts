@@ -2,16 +2,17 @@
 
 export interface NavItem {
   href: string;
-  label: string;
-  description: string;
+  /** i18n anahtarları (messages.ts: `nav.*`). Etiket Header'da `t(labelKey)` ile çözülür. */
+  labelKey: string;
+  descKey: string;
 }
 
 export const NAV_ITEMS: NavItem[] = [
-  { href: "/", label: "Import", description: "CSV yükle" },
-  { href: "/dashboard", label: "Dashboard", description: "KPI + grafikler" },
-  { href: "/validation", label: "Validation", description: "Issue yönetimi" },
-  { href: "/records", label: "Records", description: "Filtreli tablo" },
-  { href: "/sync", label: "Sync", description: "Hedef API" },
+  { href: "/", labelKey: "nav.import", descKey: "nav.import.desc" },
+  { href: "/dashboard", labelKey: "nav.dashboard", descKey: "nav.dashboard.desc" },
+  { href: "/validation", labelKey: "nav.validation", descKey: "nav.validation.desc" },
+  { href: "/records", labelKey: "nav.records", descKey: "nav.records.desc" },
+  { href: "/sync", labelKey: "nav.sync", descKey: "nav.sync.desc" },
 ];
 
 /** Aktif route eşleşmesi — "/" sadece tam eşleşir, diğerleri prefix. */

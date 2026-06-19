@@ -2,6 +2,7 @@
 
 import { Loader2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { useT } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 /**
@@ -9,6 +10,7 @@ import { cn } from "@/lib/utils";
  * value === 100 → sunucu işleme/doğrulama fazı (belirsiz, animasyonlu).
  */
 export function ImportProgress({ value, filename }: { value: number; filename?: string }) {
+  const t = useT();
   const processing = value >= 100;
   return (
     <Card data-testid="import-progress">
@@ -16,7 +18,7 @@ export function ImportProgress({ value, filename }: { value: number; filename?: 
         <div className="flex items-center justify-between text-sm">
           <span className="flex items-center gap-2 font-medium">
             <Loader2 className="h-4 w-4 animate-spin text-primary" />
-            {processing ? "İçe aktarılıyor ve doğrulanıyor…" : "Yükleniyor…"}
+            {processing ? t("import.importProgress.processing") : t("common.loading")}
             {filename && <span className="font-mono text-xs text-muted-foreground">{filename}</span>}
           </span>
           <span className="tabular-nums text-muted-foreground">
@@ -36,8 +38,8 @@ export function ImportProgress({ value, filename }: { value: number; filename?: 
 
         <p className="text-xs text-muted-foreground">
           {processing
-            ? "Satırlar parse ediliyor, normalize ediliyor ve 6 kategoride kalite kontrolünden geçiyor."
-            : "Dosya sunucuya yükleniyor."}
+            ? t("import.importProgress.processingDetail")
+            : t("import.importProgress.uploadingDetail")}
         </p>
       </CardContent>
     </Card>

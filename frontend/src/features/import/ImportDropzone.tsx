@@ -5,6 +5,7 @@ import { Upload } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
 
 /** CSV seçimi (drag-and-drop + file picker). Çoklu dosya desteklenir. */
 export function ImportDropzone({
@@ -14,6 +15,7 @@ export function ImportDropzone({
   onFiles: (files: File[]) => void;
   disabled?: boolean;
 }) {
+  const t = useT();
   const [dragging, setDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -40,9 +42,9 @@ export function ImportDropzone({
       <CardContent className="flex flex-col items-center justify-center gap-3 py-10">
         <Upload className="h-8 w-8 text-muted-foreground" />
         <div className="text-center">
-          <p className="text-sm font-medium">CSV dosyasını sürükle ya da seç</p>
+          <p className="text-sm font-medium">{t("import.importDropzone.title")}</p>
           <p className="mt-1 text-xs text-muted-foreground">
-            Tek veya birden fazla .csv · önce önizleme gösterilir, import etmeden önce onaylarsın.
+            {t("import.importDropzone.hint")}
           </p>
         </div>
         <Button
@@ -51,7 +53,7 @@ export function ImportDropzone({
           onClick={() => inputRef.current?.click()}
           disabled={disabled}
         >
-          Dosya Seç
+          {t("import.importDropzone.selectFile")}
         </Button>
         <input
           ref={inputRef}

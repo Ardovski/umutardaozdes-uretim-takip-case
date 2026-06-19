@@ -42,3 +42,13 @@ export function useRetrySync() {
     },
   });
 }
+
+export function useRetryAll() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => api.post<{ queued: number }>("/api/v1/sync/retry-all"),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.sync.history });
+    },
+  });
+}

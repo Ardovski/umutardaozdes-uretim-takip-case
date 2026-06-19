@@ -11,6 +11,7 @@ import {
 } from "@tanstack/react-table";
 import { Inbox } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useT } from "@/lib/i18n";
 import { oeeColorClass } from "@/lib/utils";
 import { useTopStations } from "./useDashboardData";
 import type { TopStationRow } from "./types";
@@ -23,6 +24,7 @@ export interface TopStationsTableProps {
 }
 
 export function TopStationsTable({ batchId }: TopStationsTableProps) {
+  const t = useT();
   const q = useTopStations(batchId, 10);
   const [sorting, setSorting] = useState<SortingState>([]);
   const data = q.data ?? [];
@@ -31,7 +33,7 @@ export function TopStationsTable({ batchId }: TopStationsTableProps) {
     () => [
       {
         accessorKey: "station_name",
-        header: "İstasyon",
+        header: t("dashboard.topStationsTable.colStation"),
         cell: (info) => (
           <span className="font-medium">{info.getValue<string>()}</span>
         ),
@@ -42,7 +44,7 @@ export function TopStationsTable({ batchId }: TopStationsTableProps) {
         cell: (info) => {
           const v = info.getValue<number | null>();
           return v === null ? (
-            "—"
+            t("common.none")
           ) : (
             <span className={`tabular-nums ${oeeColorClass(v)}`}>{v.toFixed(1)}%</span>
           );
@@ -50,14 +52,14 @@ export function TopStationsTable({ batchId }: TopStationsTableProps) {
       },
       {
         accessorKey: "total_production",
-        header: "Üretim",
+        header: t("dashboard.topStationsTable.colProduction"),
         cell: (info) => (
           <span className="tabular-nums">{fmtNum(info.getValue<number>())}</span>
         ),
       },
       {
         accessorKey: "total_scrap",
-        header: "Fire",
+        header: t("dashboard.topStationsTable.colScrap"),
         cell: (info) => {
           const v = info.getValue<number>();
           return (
@@ -69,7 +71,7 @@ export function TopStationsTable({ batchId }: TopStationsTableProps) {
       },
       {
         accessorKey: "record_count",
-        header: "Kayıt",
+        header: t("dashboard.topStationsTable.colRecordCount"),
         cell: (info) => (
           <span className="tabular-nums text-muted-foreground">
             {fmtNum(info.getValue<number>())}
@@ -77,7 +79,7 @@ export function TopStationsTable({ batchId }: TopStationsTableProps) {
         ),
       },
     ],
-    [],
+    [t],
   );
 
   const table = useReactTable({
@@ -129,7 +131,7 @@ export function TopStationsTable({ batchId }: TopStationsTableProps) {
               <td colSpan={columns.length} className="p-8">
                 <div className="flex flex-col items-center gap-2 text-sm text-muted-foreground">
                   <Inbox className="h-8 w-8 opacity-60" />
-                  <p>Veri yok</p>
+                  <p>{t("common.noData")}</p>
                 </div>
               </td>
             </tr>

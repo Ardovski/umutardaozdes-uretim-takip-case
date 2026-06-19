@@ -4,6 +4,7 @@ import { AlertTriangle, Clock, Gauge, Package } from "lucide-react";
 import { format, subDays } from "date-fns";
 import { KpiCard, oeeTone, type KpiTrend, type TrendDirection } from "./KpiCard";
 import { useKpis, useKpisPeriod } from "./useDashboardData";
+import { useT } from "@/lib/i18n";
 
 const fmtPct = (v: number | null | undefined): string =>
   v === null || v === undefined ? "—" : `${v.toFixed(1)}%`;
@@ -29,6 +30,7 @@ function pctChange(
 }
 
 export function KpiCardGrid() {
+  const t = useT();
   const kpis = useKpis();
   const today = new Date();
   const todayStr = format(today, "yyyy-MM-dd");
@@ -53,40 +55,40 @@ export function KpiCardGrid() {
   return (
     <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
       <KpiCard
-        label="Ortalama OEE"
+        label={t("dashboard.kpiCardGrid.avgOee")}
         value={fmtPct(kpis.data?.avg_oee)}
         icon={<Gauge className="h-4 w-4" />}
         tone={oeeTone(kpis.data?.avg_oee)}
         trend={oeeTrend}
-        hint="A·P·Q formülünden yeniden hesap"
+        hint={t("dashboard.kpiCardGrid.avgOeeHint")}
         loading={kpis.isLoading}
       />
       <KpiCard
-        label="Toplam Üretim"
+        label={t("dashboard.kpiCardGrid.totalProduction")}
         value={fmtNumber(kpis.data?.total_production)}
         icon={<Package className="h-4 w-4" />}
         trend={productionTrend}
-        hint="adet"
+        hint={t("dashboard.kpiCardGrid.unitHint")}
         loading={kpis.isLoading}
       />
       <KpiCard
-        label="Toplam Fire"
+        label={t("dashboard.kpiCardGrid.totalScrap")}
         value={fmtNumber(kpis.data?.total_scrap)}
         icon={<AlertTriangle className="h-4 w-4" />}
         tone="low"
         trend={scrapTrend}
         inverted
-        hint="adet"
+        hint={t("dashboard.kpiCardGrid.unitHint")}
         loading={kpis.isLoading}
       />
       <KpiCard
-        label="Toplam Duruş"
+        label={t("dashboard.kpiCardGrid.totalDowntime")}
         value={fmtHours(kpis.data?.total_down_time_minutes)}
         icon={<Clock className="h-4 w-4" />}
         tone="low"
         trend={downtimeTrend}
         inverted
-        hint="saat"
+        hint={t("dashboard.kpiCardGrid.hourHint")}
         loading={kpis.isLoading}
       />
     </section>

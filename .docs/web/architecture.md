@@ -8,6 +8,7 @@
 - **Recharts** — OEE trend / dağılım grafikleri
 - **react-hook-form + zod** — form + client-side doğrulama
 - **TanStack Table** — kayıt grid'i (filtre/sıralama/sayfalama)
+- **i18n (özel)** — `lib/i18n` (Context + `localStorage`) ile **TR/EN** sözlüğü (`messages.ts`); Header'daki `LanguageToggle` ile geçiş. Harici bağımlılık yok.
 
 ## Sayfa Yapısı (App Router)
 ```

@@ -14,6 +14,7 @@ from app.features.sync.service import (
     execute_pending,
     history,
     preview,
+    retry_all,
     retry_submission,
     submit,
 )
@@ -64,6 +65,18 @@ def history_endpoint(
 ) -> list[dict[str, object]]:
     items = history(db, limit=limit, status=status)
     return [i.model_dump() for i in items]
+
+
+@router.post("/retry-all", status_code=202)
+def retry_all_endpoint(
+    background: BackgroundTasks,
+    db: Session = Depends(get_db),
+) -> dict[str, int]:
+    """`failed`/`retrying` tüm gönderimleri arka planda yeniden dener → {queued}."""
+    ids = retry_all(db)
+    if ids:
+        background.add_task(_run_in_background, ids)
+    return {"queued": len(ids)}
 
 
 @router.post("/{submission_id}/retry")

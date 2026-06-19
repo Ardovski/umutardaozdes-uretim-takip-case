@@ -266,6 +266,26 @@ def history(
     return [_to_submission_out(r) for r in rows]
 
 
+def retry_all(db: Session) -> list[int]:
+    """`failed`/`retrying` tüm submission'ları yeniden kuyruğa al (`pending`) → id listesi.
+
+    Gerçek gönderim çağırana (endpoint) bırakılır: id'ler `execute_pending`'e arka planda
+    verilir (her grup göndermeden önce yeniden agrege edilir).
+    """
+    rows = db.execute(
+        select(models.SyncSubmission).where(
+            models.SyncSubmission.status.in_(["failed", "retrying"])
+        )
+    ).scalars().all()
+    ids: list[int] = []
+    for sub in rows:
+        sub.status = "pending"
+        sub.error_message = None
+        ids.append(sub.id)
+    db.commit()
+    return ids
+
+
 def retry_submission(
     db: Session,
     submission_id: int,

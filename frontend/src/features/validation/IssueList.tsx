@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useReactTable, getCoreRowModel, getSortedRowModel, flexRender, type ColumnDef, type SortingState } from "@tanstack/react-table";
 import { Badge, severityTone } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useT } from "@/lib/i18n";
 import { useIssues } from "./useValidation";
 import type { ValidationIssue } from "./types";
 
@@ -13,6 +14,7 @@ export interface IssueListProps {
 }
 
 export function IssueList({ recordStatus, onSelect }: IssueListProps) {
+  const t = useT();
   const filter = useMemo(() => ({ record_status: recordStatus }), [recordStatus]);
   const issues = useIssues(filter);
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -26,43 +28,43 @@ export function IssueList({ recordStatus, onSelect }: IssueListProps) {
       },
       {
         accessorKey: "rule_id",
-        header: "Kural",
+        header: t("validation.issueList.rule"),
         cell: (info) => <span className="font-mono text-xs">{info.getValue<string>()}</span>,
       },
       {
         accessorKey: "severity",
-        header: "Seviye",
+        header: t("validation.issueList.severity"),
         cell: (info) => {
           const s = info.getValue<string>();
-          return <Badge tone={severityTone(s)}>{s}</Badge>;
+          return <Badge tone={severityTone(s)}>{t(`severity.${s}`)}</Badge>;
         },
       },
       {
         accessorKey: "category",
-        header: "Kategori",
+        header: t("validation.issueList.category"),
         cell: (info) => <Badge tone="outline">{info.getValue<string>()}</Badge>,
       },
       {
         accessorKey: "fields",
-        header: "Alan(lar)",
+        header: t("validation.issueList.fields"),
         cell: (info) => (
           <span className="font-mono text-xs text-muted-foreground">
-            {info.getValue<string | null>() ?? "—"}
+            {info.getValue<string | null>() ?? t("common.none")}
           </span>
         ),
       },
       {
         accessorKey: "message",
-        header: "Mesaj",
+        header: t("validation.issueList.message"),
         cell: (info) => <span className="line-clamp-2">{info.getValue<string>()}</span>,
       },
       {
         accessorKey: "suggested_action",
-        header: "Aksiyon",
+        header: t("validation.issueList.action"),
         cell: (info) => <Badge tone="outline">{info.getValue<string>()}</Badge>,
       },
     ],
-    [],
+    [t],
   );
 
   const table = useReactTable({
@@ -105,7 +107,7 @@ export function IssueList({ recordStatus, onSelect }: IssueListProps) {
           ) : table.getRowModel().rows.length === 0 ? (
             <tr>
               <td colSpan={columns.length} className="p-4 text-center text-muted-foreground">
-                Bu sekmede issue yok.
+                {t("validation.issueList.empty")}
               </td>
             </tr>
           ) : (

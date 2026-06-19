@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Badge, severityTone } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useT } from "@/lib/i18n";
 import { useAcceptRecord, useFixRecord, useRejectRecord } from "./useValidation";
 
 export interface FixRejectButtonsProps {
@@ -11,6 +12,7 @@ export interface FixRejectButtonsProps {
 }
 
 export function FixRejectButtons({ recordId, onAfterAction }: FixRejectButtonsProps) {
+  const t = useT();
   const fix = useFixRecord();
   const reject = useRejectRecord();
   const accept = useAcceptRecord();
@@ -47,7 +49,7 @@ export function FixRejectButtons({ recordId, onAfterAction }: FixRejectButtonsPr
   return (
     <div className="space-y-3">
       <div>
-        <label className="block text-xs font-medium text-muted-foreground">Düzeltme patch (JSON)</label>
+        <label className="block text-xs font-medium text-muted-foreground">{t("validation.fixRejectButtons.patchLabel")}</label>
         <textarea
           value={patchJson}
           onChange={(e) => setPatchJson(e.target.value)}
@@ -55,22 +57,22 @@ export function FixRejectButtons({ recordId, onAfterAction }: FixRejectButtonsPr
           spellCheck={false}
         />
         <p className="mt-1 text-xs text-muted-foreground">
-          Örn: <code>{'{"produced_qty": 12}'}</code>
+          {t("validation.fixRejectButtons.example")} <code>{'{"produced_qty": 12}'}</code>
         </p>
       </div>
       <div className="flex flex-wrap gap-2">
         <Button onClick={onFix} disabled={busy} size="sm">
-          Düzelt
+          {t("validation.fixRejectButtons.fix")}
         </Button>
         <Button onClick={onReject} disabled={busy} size="sm" variant="destructive">
-          Reddet
+          {t("validation.fixRejectButtons.reject")}
         </Button>
         <Button onClick={onAccept} disabled={busy} size="sm" variant="outline">
-          Onayla
+          {t("validation.fixRejectButtons.accept")}
         </Button>
       </div>
       {fix.isError || reject.isError || accept.isError ? (
-        <Badge tone="destructive">İşlem başarısız</Badge>
+        <Badge tone="destructive">{t("validation.fixRejectButtons.actionFailed")}</Badge>
       ) : null}
     </div>
   );

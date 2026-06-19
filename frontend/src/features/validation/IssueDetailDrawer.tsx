@@ -8,6 +8,7 @@ import { Badge, severityTone } from "@/components/ui/badge";
 import { FixRejectButtons } from "./FixRejectButtons";
 import { useRecordEdits } from "./useValidation";
 import type { ValidationIssue } from "./types";
+import { useT } from "@/lib/i18n";
 
 export interface IssueDetailDrawerProps {
   issue: ValidationIssue | null;
@@ -15,6 +16,7 @@ export interface IssueDetailDrawerProps {
 }
 
 export function IssueDetailDrawer({ issue, onClose }: IssueDetailDrawerProps) {
+  const t = useT();
   const edits = useRecordEdits(issue?.record_id ?? 0);
   if (issue === null) return null;
   return (
@@ -33,7 +35,7 @@ export function IssueDetailDrawer({ issue, onClose }: IssueDetailDrawerProps) {
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-base font-semibold">Issue #{issue.id} · Record #{issue.record_id}</h2>
           <Button variant="ghost" size="sm" onClick={onClose}>
-            Kapat
+            {t("common.close")}
           </Button>
         </div>
 
@@ -47,31 +49,31 @@ export function IssueDetailDrawer({ issue, onClose }: IssueDetailDrawerProps) {
           </CardHeader>
           <CardContent className="space-y-2 text-sm text-card-foreground">
             <p>
-              <span className="font-medium text-muted-foreground">Mesaj:</span>{" "}
+              <span className="font-medium text-muted-foreground">{t("validation.issueDetailDrawer.messageLabel")}</span>{" "}
               <span className="text-foreground">{issue.message}</span>
             </p>
             <p>
-              <span className="font-medium text-muted-foreground">Alanlar:</span>{" "}
-              <span className="font-mono text-xs text-foreground">{issue.fields ?? "—"}</span>
+              <span className="font-medium text-muted-foreground">{t("validation.issueDetailDrawer.fieldsLabel")}</span>{" "}
+              <span className="font-mono text-xs text-foreground">{issue.fields ?? t("common.none")}</span>
             </p>
             <p>
-              <span className="font-medium text-muted-foreground">Öneri:</span>{" "}
+              <span className="font-medium text-muted-foreground">{t("validation.issueDetailDrawer.suggestionLabel")}</span>{" "}
               <Badge tone="outline">{issue.suggested_action}</Badge>
             </p>
             <p>
-              <span className="font-medium text-muted-foreground">Durum:</span>{" "}
+              <span className="font-medium text-muted-foreground">{t("validation.issueDetailDrawer.statusLabel")}</span>{" "}
               <Badge tone="outline">{issue.status}</Badge>
             </p>
             <p className="text-xs text-muted-foreground">
-              Tespit: {issue.detected_at ?? "—"}
-              {issue.fixed_at ? ` · Çözüm: ${issue.fixed_at}` : ""}
+              {t("validation.issueDetailDrawer.detectedLabel")} {issue.detected_at ?? t("common.none")}
+              {issue.fixed_at ? ` · ${t("validation.issueDetailDrawer.resolvedLabel")} ${issue.fixed_at}` : ""}
             </p>
           </CardContent>
         </Card>
 
         <Card className="mb-3">
           <CardHeader>
-            <CardTitle>Aksiyon</CardTitle>
+            <CardTitle>{t("validation.issueDetailDrawer.actionTitle")}</CardTitle>
           </CardHeader>
           <CardContent>
             <FixRejectButtons recordId={issue.record_id} onAfterAction={onClose} />
@@ -80,13 +82,13 @@ export function IssueDetailDrawer({ issue, onClose }: IssueDetailDrawerProps) {
 
         <Card>
           <CardHeader>
-            <CardTitle>Audit Trail</CardTitle>
+            <CardTitle>{t("validation.issueDetailDrawer.auditTrailTitle")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 text-xs">
             {edits.isLoading ? (
               <Skeleton className="h-12 w-full" />
             ) : (edits.data ?? []).length === 0 ? (
-              <p className="text-muted-foreground">Henüz edit yok.</p>
+              <p className="text-muted-foreground">{t("validation.issueDetailDrawer.noEdits")}</p>
             ) : (
               (edits.data ?? []).map((e) => (
                 <div key={e.id} className="rounded border bg-background p-2">

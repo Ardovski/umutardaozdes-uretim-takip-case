@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useT } from "@/lib/i18n";
 import { DashboardHeader } from "./DashboardHeader";
 import { KpiCardGrid } from "./KpiCardGrid";
 import { OeeTrendChart } from "./OeeTrendChart";
@@ -17,6 +18,7 @@ export function DashboardPage() {
   // aynı veri kümesini göstermeli. batchId=null → tüm kayıtlar (tutarlı görünüm).
   const batchId: number | null = null;
   const [tab, setTab] = useState("recent");
+  const t = useT();
 
   return (
     <main className="container mx-auto space-y-6 py-8">
@@ -36,9 +38,9 @@ export function DashboardPage() {
 
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList>
-          <TabsTrigger value="recent">Son Kayıtlar</TabsTrigger>
-          <TabsTrigger value="top">Top İstasyonlar</TabsTrigger>
-          <TabsTrigger value="problems">Sorunlu Vardiyalar</TabsTrigger>
+          <TabsTrigger value="recent">{t("dashboard.dashboardPage.recentRecords")}</TabsTrigger>
+          <TabsTrigger value="top">{t("dashboard.dashboardPage.topStations")}</TabsTrigger>
+          <TabsTrigger value="problems">{t("dashboard.dashboardPage.problemShifts")}</TabsTrigger>
         </TabsList>
         <TabsContent value="recent">
           <RecentRecordsTable batchId={batchId} />

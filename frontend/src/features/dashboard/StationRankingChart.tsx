@@ -13,6 +13,7 @@ import {
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useT } from "@/lib/i18n";
 import { oeeTone } from "./KpiCard";
 import { useStationRanking } from "./useDashboardData";
 
@@ -24,6 +25,7 @@ function oeeBarColor(v: number | null): string {
 }
 
 export function StationRankingChart() {
+  const t = useT();
   const q = useStationRanking(10);
   const rows = (q.data ?? []).slice(0, 10);
 
@@ -31,7 +33,7 @@ export function StationRankingChart() {
     <Card className="transition-shadow hover:shadow-md">
       <CardHeader>
         <CardTitle className="text-sm font-medium text-muted-foreground">
-          İstasyon Sıralaması (Top 10)
+          {t("dashboard.stationRankingChart.title")}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -40,7 +42,7 @@ export function StationRankingChart() {
         ) : rows.length === 0 ? (
           <div className="flex h-72 flex-col items-center justify-center gap-2 text-sm text-muted-foreground">
             <Inbox className="h-8 w-8 opacity-60" />
-            <p>Veri yok</p>
+            <p>{t("common.noData")}</p>
           </div>
         ) : (
           <ResponsiveContainer
